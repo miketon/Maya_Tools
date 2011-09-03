@@ -1,0 +1,95 @@
+//string $pMan = `polyMan`;
+
+global proc string polyMan(){
+    //torso
+polyPlane -ch on -o on -ax 0 0 1 -w 1.198186 -h 2.298562 -sw 1 -sh 1 -cuv 2;
+select -addFirst polyPlane1 ;
+setAttr "polyPlane1.subdivisionsWidth" 4;
+setAttr "polyPlane1.subdivisionsHeight" 4;
+move -r 0 3.744696 0 ;
+    select -cl  ;
+select -add pPlane1.e[3] pPlane1.e[12] pPlane1.e[21] pPlane1.e[30] ;
+move -r 0.214355 0 0 ;
+    select -cl  ;
+select -add pPlane1.e[27] pPlane1.e[29] pPlane1.e[31] pPlane1.e[33] ;
+move -r 0 -0.0893144 0 ;
+    //feet
+select -cl  ;
+select -r pPlane1.e[0] ;
+polyExtrudeEdge -constructionHistory 1 -keepFacesTogether 1 -pvx -0.3421422616 -pvy 2.595414975 -pvz 0 -divisions 1 -twist 0 -taper 1 -smoothingAngle 30 pPlane1.e[0];
+setAttr "polyExtrudeEdge1.localTranslate" -type double3 0 -2.339418 0 ;
+select -r pPlane1.e[42] ;
+polyExtrudeEdge -constructionHistory 1 -keepFacesTogether 1 -pvx -0.3421422616 -pvy 0.2559968022 -pvz 0 -divisions 1 -twist 0 -taper 1 -smoothingAngle 30 pPlane1.e[42];
+setAttr "polyExtrudeEdge2.localTranslate" -type double3 0 -0.18138 0 ;
+setAttr "polyExtrudeEdge2.localScale" -type double3 0.437848 0.902461 1 ;
+    //arm
+select -r pPlane1.f[16] ;
+select -tgl pPlane1.f[17] ;
+hilite pPlane1.f[16:17] ;
+selectMode -component ;
+select -r pPlane1.f[16:17] ;
+polyChipOff -ch 1 -kft 1 -dup 0 -off 0 pPlane1.f[16:17];
+// Result: polyChipOff1 // 
+polyPerformAction ("polySeparate -rs 1", "o", 0);
+polySeparate -rs 1 -ch 1 pPlaneShape1;
+// Result: polySurface1 polySurface2 polySeparate1 // 
+// Result: polySeparate -rs 1 -ch 1 pPlaneShape1 // 
+select -r polySurface2 ;
+duplicate -rr;
+// Result: polySurface3 //
+move -a -0.745 1.344 0 ;
+scale -r 0.693525 0.693525 0.693525 ;
+move -r 0 3.674755 0 ;
+    //shoulder
+select -r polySurface1.e[28] ;
+performPolyExtrude 0;
+select -r polySurface1.e[28] ;
+polyExtrudeEdge -constructionHistory 1 -keepFacesTogether 1 -pvx -0.59909302 -pvy 4.561999658 -pvz 0 -divisions 1 -twist 0 -taper 1 -smoothingAngle 30 polySurface1.e[28];
+// Result: polyExtrudeEdge3 // 
+// Result: polyExtrudeEdge -constructionHistory 1 -keepFacesTogether 1 -pvx -0.59909302 -pvy 4.561999658 -pvz 0 -divisions 1 -twist 0 -taper 1 -smoothingAngle 30 polySurface1.e[28] // 
+setAttr "polyExtrudeEdge3.localScale" -type double3 1 1.162852 1 ;
+setAttr "polyExtrudeEdge3.localTranslate" -type double3 0 0.185886 0 ;
+select -r polySurface1.vtx[26] ;
+move -r -0.220644 -0.192476 0 ;
+    //head
+polySphere -ch on -o on -ax 0 0 1 -r 0.5 ;
+// Result: pSphere1 polySphere1 // 
+select -r pSphere1 ;
+select -addFirst polySphere1 ;
+setAttr "polySphere1.subdivisionsAxis" 10;
+setAttr "polySphere1.subdivisionsHeight" 5;
+move -r 0 5.47854 0 ;
+    //clean up body
+select -cl  ;
+select -r polySurface1 ;
+select -tgl polySurface2 ;
+select -tgl polySurface3 ;
+polyUnite -ch 0 polySurface1 polySurface2 polySurface3;
+// Result: polySurface4 polyUnite1 // 
+select -r polySurface4.e[42] ;
+select -tgl polySurface4.e[59] ;
+polyBridgeEdge -ch 0 -divisions 0 -twist 0 -taper 1 -curveType 0 -smoothingAngle 30;
+// Result: polyBridgeEdge12 // 
+select -cl  ;
+select -r polySurface4.f[2:3] polySurface4.f[6:7] polySurface4.f[10:11] polySurface4.f[14:15] ;
+doDelete;
+select -r polySurface4 ;
+duplicate -rr; scale -r -1 1 1;
+// Result: polySurface5 //
+select -r polySurface4 ;
+select -tgl polySurface5 ;
+polyUnite -ch 0 polySurface4 polySurface5;
+// Result: polySurface6 polyUnite1 // 
+select -r polySurface6.f[0:29] ;
+polyExtrudeFacet -constructionHistory 1 -keepFacesTogether 1 -pvx 0 -pvy 2.484296918 -pvz 0 -divisions 1 -twist 0 -taper 1 -off 0 -smoothingAngle 30 polySurface6.f[0:29];
+// Result: polyExtrudeFace1 // 
+setAttr "polyExtrudeFace1.localTranslate" -type double3 0 0 0.225;
+select -r polySurface6 ;
+move -r 0 0 -.1225 ;
+select -tgl pSphere1 ;
+$polyman = `polyUnite -ch 0 -n "polyMan_00" polySurface6 pSphere1`;
+
+return $polyman[0];
+}
+
+

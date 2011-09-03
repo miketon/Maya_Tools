@@ -1,0 +1,42 @@
+// Utilities for editing skin shapes
+// Mike Ton (mike.ton@gmail.com)  6/12/2010
+// cnCreateSkeleton() written by Cid Newman (cid_newman@yahoo.com)
+
+
+/*
+copySkinWeights -ss skinCluster1 -ds skinCluster1 -mirrorMode YZ -mirrorInverse;
+copySkinWeights -ss skinCluster1 -ds skinCluster1 -mirrorMode YZ; // -mirrorInverse;
+*/
+
+
+	string $mt_connections[] = `listConnections -d false skinCluster1.matrix`;
+		int $count = size($mt_connections);
+		int $i = 0;
+	for ($i = 0; $i < $count; $i++){
+		string $matrixString = "";
+		string $slotNJoint[] = `listConnections -d false skinCluster1.matrix[1]`;
+		float $invsMatrix[] = `getAttr ($slotNJoint[0]+".worldInverseMatrix")`;
+		for($num in $invsMatrix){		//format float array to string
+			float $num_Rounded = cSaveW_roundTo($num, 10);
+			$matrixString += (" " + $num_Rounded);
+		}
+			
+		$matrixString = ("setAttr  skinCluster1.bindPreMatrix[0] -type \"matrix\" " + $matrixString + ";");
+		eval($matrixString);
+		
+			//reset the stored pose in any dagposes that are connected
+		string $dagPose[] = `listConnections -d false - type "dagPose" skinCluster1`;
+		for($dag in $dagPose){
+			dagPose -reset -n $dag $slotNJoint[0];
+		}
+	}
+
+proc float cSaveW_roundTo(float $val, int $places)
+{
+    float $mult = pow(10.0, $places) ;
+    $val = 1.0 * $val * $mult ;		// Shift it all over to the left
+    int $nVal = (int)$val ;		// Remove anything left in the decimal
+    $val = 1.0 * $nVal / $mult ;	// Now shift back.
+    return $val ;
+}
+

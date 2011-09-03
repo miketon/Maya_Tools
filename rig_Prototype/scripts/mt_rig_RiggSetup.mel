@@ -1,0 +1,796 @@
+// Utilities for setting up a joint skeleton
+// Mike Ton (mike.ton@gmail.com)  6/12/2010
+// ik Spine developed by Cid Newman (cid_newman@yahoo.com)
+
+/*
+	mtCharRig("Mike", 1.0);		//RiverCity
+	mtCharRig("Mike", 2.0); 
+	mtCharRig("Mike",4.0);	//Juggernaut
+*/
+	
+global proc mtCharRig(string $nameIN, float $ctl_scaleIN){
+	global float $mtScale = 1.0;
+	float	$mtScale =$ctl_scaleIN;
+	int		$mtStretchTGL	= 0;
+	string		$mtCharacterSet 	= `character -em -n ($nameIN+"_Rig")`;
+	string		$mtControlSet =	($nameIN+"_controlSet");
+		string	$Spine_1 	= "Spine_1";
+		string	$Spine_2 	= "Spine_2";
+		string	$Collar 		= "Collar";
+		string	$Neck_1 		= "Neck_1";
+		string	$Head_1 		= "Head_1";
+		string	$R_collar 	= "R_collar";
+		string	$R_shoulder 	= "R_shoulder";
+		string	$R_wrist 		= "R_wrist";
+		string	$R_arm 		= "R_arm";
+		string	$R_hip 		= "R_hip";
+		string	$R_ankle 	= "R_ankle";
+		string	$R_ball 		= "R_ball";
+		string	$R_toe 		= "R_toe";
+		string	$R_foot 		= "R_foot";
+			string	$R_heel 		= "R_heel";
+		string	$L_collar 	= "L_collar";
+		string	$L_shoulder 	= "L_shoulder";
+		string	$L_wrist 		= "L_wrist";
+		string	$L_arm 		= "L_arm";
+		string	$L_hip 		= "L_hip";
+		string	$L_ankle 		= "L_ankle";
+		string	$L_ball 		= "L_ball";
+		string	$L_toe 		= "L_toe";
+		string	$L_foot 		= "L_foot";
+			string	$L_heel 		= "L_heel";
+
+	string	$tempCharRoot[] = `spaceLocator -n "charRoot"`;
+	string 	$ctl_ROOT[] = mtGenControl($tempCharRoot[0], "world_Root", "root", (2.5 * $mtScale), "Y");			delete $tempCharRoot[0];
+		
+	string $ctl_COG[] 		= mtSpine_IK($Spine_1, $Spine_2, $Collar);	//0 - COG, 1 - Upperbody, 2-HipControl
+	string $ctl_L_arm[] 	= mtArm_IK($L_collar, $L_shoulder, $L_wrist, $L_arm, $mtStretchTGL);		//0-shoulder, 1-wristCon
+	string $ctl_R_arm[] 	= mtArm_IK($R_collar, $R_shoulder, $R_wrist, $R_arm, $mtStretchTGL);	//2-globalCon, 3-wristIK, 4-poleCon
+		string $ctl_L_wrist[] = mtRigFingers($L_wrist); 
+		string $ctl_R_wrist[] = mtRigFingers($R_wrist); 
+	string $ctl_L_foot[] 	= mtLeg_IK($L_hip, $L_ankle, $L_heel , $L_ball, $L_toe, $L_foot, $mtStretchTGL);	//0-footCon, 1-footCOG
+	string $ctl_R_foot[] 	= mtLeg_IK($R_hip, $R_ankle, $R_heel , $R_ball, $R_toe, $R_foot, $mtStretchTGL);	//2-poleCon
+	string $ctl_Head[] 		= mtHead_IK($Neck_1, $Head_1);
+
+		//organize Character set for controls
+	mt_ZERO_NODE_PARENT($ctl_COG[0], $ctl_ROOT[0]);
+	mt_ZERO_NODE_PARENT($ctl_L_foot[0], $ctl_ROOT[0]);	//0-footControl
+	mt_ZERO_NODE_PARENT($ctl_R_foot[0], $ctl_ROOT[0]);
+	mt_ZERO_NODE_PARENT($ctl_L_foot[1], $ctl_COG[0]);	//1-footCOGControl
+	mt_ZERO_NODE_PARENT($ctl_R_foot[1], $ctl_COG[0]);
+	mt_ZERO_NODE_PARENT($ctl_L_foot[2], $ctl_COG[2]);	//2-leg poleConstraint
+	mt_ZERO_NODE_PARENT($ctl_R_foot[2], $ctl_COG[2]);
+	mt_ZERO_NODE_PARENT($ctl_Head[0], $ctl_COG[0]);
+		mt_ZERO_NODE_PARENT($ctl_L_wrist[0], $ctl_COG[0]);
+		mt_ZERO_NODE_PARENT($ctl_R_wrist[0], $ctl_COG[0]);
+	mt_ZERO_NODE_PARENT($ctl_L_arm[0], $ctl_COG[1]);	//0-shoulder control obj
+	mt_ZERO_NODE_PARENT($ctl_R_arm[0], $ctl_COG[1]);
+	mt_ZERO_NODE_PARENT($ctl_L_arm[1], $ctl_COG[1]);	//1-wrist control obj
+	mt_ZERO_NODE_PARENT($ctl_R_arm[1], $ctl_COG[1]);
+	mt_ZERO_NODE_PARENT($ctl_L_arm[2] , $ctl_ROOT[0]);	//2-Global Hands
+	mt_ZERO_NODE_PARENT($ctl_R_arm[2] , $ctl_ROOT[0]);
+	parent $ctl_L_arm[3] $ctl_COG[1];					//3-wristIK
+	parent $ctl_R_arm[3] $ctl_COG[1];
+	mt_ZERO_NODE_PARENT($ctl_L_arm[4] , $ctl_COG[1]);	//4-poleConstraint
+	mt_ZERO_NODE_PARENT($ctl_R_arm[4] , $ctl_COG[1]);
+
+	string $filterXFORM = `itemFilter -byType transform`;		//string $filterNURBS = `itemFilter -byType nurbsCurve`;
+	string $filteredNODES[] = `lsThroughFilter $filterXFORM`;
+	string $mtControlNODES[] = {};
+	
+	for($xform in $filteredNODES){
+		string $attrNodes[] = `listAttr -ud $xform`;	//get only user attributes
+		for($node in $attrNodes){
+			if($node == "mtControlNode"){	$mtControlNODES[size($mtControlNODES)] = $xform;	}
+		}
+	}
+	setKeyframe -time -1 -breakdown 0 -hierarchy none -controlPoints 0 -shape 0 $mtControlNODES;	//sets base keyframe for character set function
+		//collect controls into selection set
+		select -cl;
+	for($control in $mtControlNODES){		
+		select -add $control;	
+		character -add ($mtCharacterSet) $control;
+	};				
+	sets -name $mtControlSet;		
+		select -cl;
+	setCurrentCharacters( { $mtCharacterSet } );
+		//Clean-UP
+	string $locators[] = `ls -typ "locator"`;
+	string $ikHandles[] = `ls -typ "ikHandle"`;
+	for($locator in $locators){
+		mtLocknHide_Attr($locator, "all");
+		setAttr ($locator +".visibility") 0ff;
+	}
+	for($handle in $ikHandles){
+		mtLocknHide_Attr($handle, "all"); 
+		setAttr ($handle +".visibility") 0ff;
+	}
+//HACK!!! : Haven't figured out spacing order for foot
+	float $posHeel[] = `xform -q -ws -rp $R_heel`;
+	select $ctl_R_foot[0];
+		selectCurveCV("all");
+		rotate -r -p $posHeel[0] $posHeel[1] $posHeel[2]  -os 0 0 -90 ;
+		rotate -r -p $posHeel[0] $posHeel[1] $posHeel[2]  -os 0 -90 0 ;
+	$posHeel = `xform -q -ws -rp $L_heel`;
+	select $ctl_L_foot[0];
+		selectCurveCV("all");
+		rotate -r -p $posHeel[0] $posHeel[1] $posHeel[2]  -os 0 0 -90 ;
+		rotate -r -p $posHeel[0] $posHeel[1] $posHeel[2]  -os 0 90 0 ;
+	select -cl;
+//HACK!!! : Haven't figured out spacing order for foot
+    
+//Add Nodes for IK-FK switch
+    string $L_armPole_LOC[] = `spaceLocator -n ($ctl_L_arm[4] + "_FK")`;
+        $tmpConstr =`pointConstraint $ctl_L_arm[4] $L_armPole_LOC[0]`;    delete $tmpConstr;
+        parentConstraint -mo $L_shoulder $L_armPole_LOC[0];
+    string $R_armPole_LOC[] = `spaceLocator -n ($ctl_R_arm[4] + "_FK")`;
+        $tmpConstr =`pointConstraint $ctl_R_arm[4] $R_armPole_LOC[0]`;    delete $tmpConstr;
+        parentConstraint -mo $R_shoulder $R_armPole_LOC[0];
+    string $L_knee[] = `listRelatives -c $L_hip`;
+        string $L_legPole_LOC[] = `spaceLocator -n ($ctl_L_foot[2] + "_FK")`;
+        $tmpConstr =`pointConstraint $ctl_L_foot[2] $L_legPole_LOC[0]`;    delete $tmpConstr;
+        parentConstraint -mo $L_hip $L_legPole_LOC[0]; 
+    string $R_knee[] = `listRelatives -c $R_hip`;
+        string $R_legPole_LOC[] = `spaceLocator -n ($ctl_R_foot[2] + "_FK")`;
+        $tmpConstr =`pointConstraint $ctl_R_foot[2] $R_legPole_LOC[0]`;    delete $tmpConstr;
+        parentConstraint -mo $R_hip $R_legPole_LOC[0]; 
+}														//mtCharRig("Mike")
+
+
+proc string[] mtSpine_IK(string $spineBase, string $spineMid, string $spineEnd){
+global float $mtScale;
+    	float $rootPos[] = `xform -q -ws -t $spineBase`;
+	float $midPos[]  = `xform -q -ws -t $spineMid`;
+	float $colPos[]  = `xform -q -ws -t $spineEnd`;
+
+	string $tempCOG[] = `spaceLocator -n "COG"`;
+		xform -ws -t $rootPos[0] $rootPos[1] $rootPos[2] $tempCOG[0];
+	string $mtCOG[]	= mtGenControl($tempCOG[0], "COG", "octag", (1.25* $mtScale), "Y");					delete $tempCOG[0];
+		
+	string $MidBackGRP = `group -em -n "MidBackGRP"`;
+	string $tempMidBackLocator[] = `spaceLocator -n "MidBackLocator"`;
+		xform -ws -t $midPos[0] $midPos[1] $midPos[2] $MidBackGRP $tempMidBackLocator[0];
+	string $MidRot = `group -em -n "MidRot"`;
+		//setAttr ($MidRot + ".rotateOrder") 1; //???
+		xform -ws -t $rootPos[0] $rootPos[1] $rootPos[2] $MidRot;
+		parent $MidBackGRP $MidRot;
+		parent $MidRot $mtCOG[0];
+		makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $MidBackGRP; 
+
+	string $MidRotControl[] = mtGenControl($tempMidBackLocator[0], "spine", "octag", (1.0* $mtScale), "Y");		delete $tempMidBackLocator[0];
+		mt_ZERO_NODE_PARENT($MidRotControl[0], $MidBackGRP);
+ 
+	string $CollarGRP = `group -em -n "CollarGRP"`;
+	string $tempUpperBody[] = `spaceLocator -n "UpperBody"`;
+		xform -ws -t $colPos[0] $colPos[1] $colPos[2] $tempUpperBody[0] $CollarGRP;
+	string $UpperBodyControl[] = mtGenControl($tempUpperBody[0], "UpperBody", "octag", (1.25* $mtScale), "Z");	delete $tempUpperBody[0];
+		mt_ZERO_NODE_PARENT($UpperBodyControl[0], $mtCOG[0]);
+		xform -ws -rp $rootPos[0] $rootPos[1] $rootPos[2] $UpperBodyControl[0];
+
+		//Ugly HACK to find root!!!
+	string $HipLocatorControl[];
+	string $spineRoot[] = `listRelatives -p -typ "joint" $spineBase`;
+	if($spineRoot[0] != ""){
+		string $tempHipLocator[] = `spaceLocator -n "HipLocator"`;
+			xform -ws -t $rootPos[0] $rootPos[1] $rootPos[2] $tempHipLocator[0];
+		$HipLocatorControl = mtGenControl( $tempHipLocator[0], "spine", "diam", (1.0* $mtScale), "Z");	delete $tempHipLocator[0];
+			mt_ZERO_NODE_PARENT($HipLocatorControl[0], $mtCOG[0]);
+		parentConstraint -mo $HipLocatorControl[0] $spineRoot[0]; 
+	}
+		// Low Back/Mid Back
+	string $MidBackIK[] = `ikHandle -sol ikRPsolver -sj $spineBase -ee $spineMid -n "MidBackIK"`;
+	parent $MidBackIK[0] $MidRotControl[0];
+		// Mid Back/Collar
+	string $CollarIK[] = `ikHandle -sol ikRPsolver -sj $spineMid  -ee $spineEnd -n "CollarIK"`;
+	parent $CollarIK[0] $CollarGRP;
+	parent $CollarGRP $UpperBodyControl[0];
+
+	addAttr -ln shoulderFlex -at double  -min 0 -max 1 -dv 0.2 -keyable true $UpperBodyControl[0];
+	addAttr -ln sideFlex -at double  -min 0 -max 1 -dv 0.5 -keyable true $UpperBodyControl[0];
+	addAttr -ln frontFlex -at double  -min 0 -max 1 -dv 0.5 -keyable true $UpperBodyControl[0];
+	addAttr -ln twistFlex -at double  -min 0 -max 1 -dv 0.5 -keyable true $UpperBodyControl[0];
+
+	float $midDist = `distance2Pts $rootPos $midPos`;
+	float $colDist = `distance2Pts $rootPos $colPos`;
+	float $perDist = $midDist/$colDist;					//1/($colDist/$midDist);
+													//float $scaleXMain = `getAttr MainBody.sx`;
+													//float $scaleZMain = `getAttr MainBody.sz`;
+	expression -n ($spineBase + "_EXP") -s 
+	(
+		"    //Spine : Bend Control	\r"+	
+		$MidBackGRP+".tx = "+$UpperBodyControl[0]+".tx * " + $perDist + " * (1 - "+$UpperBodyControl[0]+".sideFlex);		\r"+	
+		$MidBackGRP+".tz = "+$UpperBodyControl[0]+".tz * " + $perDist + " * (1 - "+$UpperBodyControl[0]+".frontFlex);	\r"+	
+		"    //MidRot: Bend Behaviour	\r"+
+		$MidRot + ".rx = " + $UpperBodyControl[0] + ".rx * (1 - " + $UpperBodyControl[0] + ".frontFlex);	\r"+
+		$MidRot + ".ry = " + $UpperBodyControl[0] + ".ry * (1 - " + $UpperBodyControl[0] + ".twistFlex);	\r"+ 
+		$MidRot + ".rz = " + $UpperBodyControl[0] + ".rz * (1 - " + $UpperBodyControl[0] + ".sideFlex);	\r" 
+	);
+
+	mtLocknHide_Attr($MidRotControl[0], "rot");
+	return {$mtCOG[0], $UpperBodyControl[0], $HipLocatorControl[0]};
+}														//mtSpine_IK("Spine_1", "Spine_2", "Collar");
+
+
+proc string[] mtArm_IK(string $collar_jnt, string $shoul_jnt, string $wrist_jnt, string $arm_cnt, int $stretchIK){
+global float $mtScale;
+	string $elbow_jnt[] = `listRelatives -p $wrist_jnt`;
+		//Shoulder Setup
+    setAttr ($elbow_jnt[0]+".jointTypeX") 0;
+    setAttr ($elbow_jnt[0]+".jointTypeZ") 0;
+    setAttr -lock true -keyable false  ($elbow_jnt[0]+".rx");
+    setAttr -lock true -keyable false ($elbow_jnt[0]+".rz");
+	string $tempLocator[] = `spaceLocator -n ($shoul_jnt + "_Loc")`;
+		string $tmpConstr[] =`parentConstraint $shoul_jnt $tempLocator[0]`;					delete $tmpConstr;
+	string $shoulderControl[] = mtGenControl($tempLocator[0], $arm_cnt, "octag", (0.65 * $mtScale), "X");		delete $tempLocator;	
+
+	float $posColl[] = `xform -q -ws -t $collar_jnt`;
+		xform -ws -rp $posColl[0] $posColl[1] $posColl[2] $shoulderControl[0];
+		orientConstraint -mo $shoulderControl[0] $collar_jnt;
+		pointConstraint -mo $collar_jnt $shoulderControl[0];
+
+		//Arm Setup		//NOTE : How to set preferred angle???
+	string $ikHandle[] = `ikHandle -sol ikRPsolver -sj $shoul_jnt -ee $wrist_jnt -n ($wrist_jnt+"IK")`;
+		//poleConstraint setup
+	string $tempIK_poleConstraint[] = `spaceLocator -n ($wrist_jnt+"IK_Loc_poleCon")`;
+		$tmpConstr =`pointConstraint $shoul_jnt $tempIK_poleConstraint[0]`;			delete $tmpConstr;
+		xform -r -t 0 0 (-$mtScale * 0.5) $tempIK_poleConstraint[0];
+	string $poleConsObj[] = mtGenControl($tempIK_poleConstraint[0], "UpperBodyChildren", "circle", (0.1* $mtScale), "Z");	
+	string $poleCon[] = `poleVectorConstraint $poleConsObj[0]  $ikHandle[0]`;
+	string $tempIK_Loc[] = `spaceLocator -n ($wrist_jnt+"IK_Loc")`;
+		$tmpConstr =`parentConstraint $wrist_jnt $tempIK_Loc[0]`;								delete $tmpConstr;
+	string $wristControl[] = mtGenControl($tempIK_Loc[0], "UpperBodyChildren", "octag", (0.5* $mtScale), "X");	delete $tempIK_Loc;
+
+		//Global Hand
+	string $tempTarget[] = `spaceLocator -n ($wrist_jnt + "_World")`;
+		$tmpConstr =`parentConstraint $wrist_jnt $tempTarget[0]`;									delete $tmpConstr;
+	string $globalTarget[] = mtGenControl($tempTarget[0], "globalTarget", "textG", (0.15* $mtScale), "UpVector:XYZ");	delete $tempTarget;
+	string $globalTargetConstraint[] = `parentConstraint -mo $globalTarget[0] $wristControl[0] $ikHandle[0]`;
+		setAttr ($globalTargetConstraint[0]+".interpType") 2;	//??? reduces chance of flipping
+	string $globalTargetConstraintRot[] = `orientConstraint -mo $globalTarget[0] $wristControl[0] $wrist_jnt`;
+		setAttr ($globalTargetConstraintRot[0]+".interpType") 2;	//??? reduces chance of flipping
+
+	addAttr -ln "ikBlend"  -min 0 -max 10 -dv 10 -keyable true $wristControl[0];
+	addAttr -ln "elbowTwist"  -min -10 -max 10 -dv 0 -keyable true $wristControl[0];
+	addAttr -ln "handToWorld"  -min 0 -max 10 -dv 0 -keyable true $wristControl[0];
+
+	string $codeBlock = 	
+		"    //Arm: IKBlend and elbowTwist	\r"+	
+		$ikHandle[0] +".ikBlend = " +$wristControl[0] +".ikBlend * 0.1;	\r"+	
+		$ikHandle[0] +".twist = " +$wristControl[0] +".elbowTwist * 20.0 ;	\r"+	
+		"    //Hands: World to character space switching	\r"+
+		$globalTargetConstraintRot[0] + "." + $globalTarget[0] + "W0 = " + $globalTargetConstraint[0] + "." + $globalTarget[0] + "W0 = " + 
+			$globalTarget[0]+".visibility = " + $wristControl[0] +".handToWorld;	\r"+
+		$globalTargetConstraintRot[0]+"."+$wristControl[0]+"W1 = " + $globalTargetConstraint[0]+"."+$wristControl[0]+"W1 = 10.0 - " + $wristControl[0] +".handToWorld;";
+	
+		//ForeArm Setup
+	string $tempChildColl[] = `listRelatives -c -typ "joint" $elbow_jnt[0]`;
+	if(size($tempChildColl) > 1){		//check to see if foreArm exists
+		for($child in $tempChildColl){
+			if ($child != $wrist_jnt){ 
+				$codeBlock += 
+				"\r    //Arm: foreArmTwist	\r"+	
+				$child+".rx = " + $wristControl[0]+".rx * 0.5;";
+			}
+		}
+	}
+	
+	if($stretchIK == 1){	//yes stretch
+		$codeBlock  += mtStretchyIK_Exp($shoul_jnt, $wrist_jnt, $ikHandle[0]);
+	}
+
+	expression -n ($arm_cnt+"_Hand_EXP") -s ($codeBlock);
+
+	string $FK_jointCollection[] = {$collar_jnt, $shoul_jnt, $elbow_jnt[0], $wrist_jnt};
+
+	for($joint in $FK_jointCollection){
+		jointFK_xform($joint, ($ikHandle[0] +".ikBlend"));
+	}
+
+	mtLocknHide_Attr($shoulderControl[0], "trn");
+	mtLocknHide_Attr($shoulderControl[0], "scl");
+	mtLocknHide_Attr($wristControl[0], "scl");
+	mtLocknHide_Attr($poleConsObj[0], "rot");
+
+	return {$shoulderControl[0], $wristControl[0], $globalTarget[0], $ikHandle[0], $poleConsObj[0]};
+}													//mtArm_IK("L_collar", "L_shoulder", "L_wrist", "L_arm", $mtStretchTGL);
+
+
+proc string[] mtLeg_IK(string $hip_Jnt, string $ankle_Jnt, string $heel_Jnt, string $ball_Jnt, string $toe_Jnt, string $foot_Cont, int $stretchIK){
+global float $mtScale;
+    string $knee_jnt[] = `listRelatives -c $hip_Jnt`;
+        setAttr ($knee_jnt[0]+".jointTypeX") 0;
+        setAttr ($knee_jnt[0]+".jointTypeZ") 0;
+        setAttr -lock true -keyable false  ($knee_jnt[0]+".rx");
+        setAttr -lock true -keyable false ($knee_jnt[0]+".rz");
+		//set up Ik
+	string $ankle_Handle[] = `ikHandle -sol ikRPsolver -sj $hip_Jnt -ee $ankle_Jnt -n ("hnd_"+$ankle_Jnt)`;
+		//poleConstraint setup
+		float $hipPos[] = `xform -q -t -ws $hip_Jnt`;				
+		float $num = 1.0;								
+		if($hipPos[0]< 0.0){ 	$num = -$num;	}	//determine if this is the right or left side leg	
+	setAttr ($ankle_Handle[0] +".twist") (90.0*$num);
+	string $tempIK_poleConstraint[] = `spaceLocator -n ($foot_Cont+"_Group_poleCon")`;
+		string $tmpConstr[] =`pointConstraint $hip_Jnt $tempIK_poleConstraint[0]`;			delete $tmpConstr;
+	xform -r -t ($mtScale * $num * 0.5) 0 0 $tempIK_poleConstraint[0];
+	string $poleConsObj[] = mtGenControl($tempIK_poleConstraint[0], "COGChildren", "circle", (0.1* $mtScale), "Z");	delete $tempIK_poleConstraint;
+	string $poleCon[] = `poleVectorConstraint $poleConsObj[0]  $ankle_Handle[0]`;
+
+	string $ball_Handle[] = `ikHandle -sol ikRPsolver -sj $ankle_Jnt -ee $ball_Jnt -n ("hnd_"+$ball_Jnt)`;
+	string $toe_Handle[] = `ikHandle -sol ikRPsolver -sj $ball_Jnt -ee $toe_Jnt -n ("hnd_"+$toe_Jnt)`;
+		//grouping
+	string $anklePivot[] = `spaceLocator -n ($ankle_Jnt + "_Pivot")`;
+		$tmpConstr =`parentConstraint $ball_Jnt $anklePivot[0]`;					delete $tmpConstr;
+		mt_ZERO_NODE_SET($anklePivot[0]);
+		parent $ankle_Handle[0] $anklePivot[0];
+	string $toePivot[] = `spaceLocator -n ($toe_Jnt + "_Pivot")`;
+		$tmpConstr =`parentConstraint $ball_Jnt $toePivot[0]`;							delete $tmpConstr;
+		mt_ZERO_NODE_SET($toePivot[0]);
+		parent $toe_Handle[0] $toePivot[0];
+	string $heelPivot[] = `spaceLocator -n ($heel_Jnt + "_Pivot")`;
+		$tmpConstr =`parentConstraint $heel_Jnt $heelPivot[0]`;						delete $tmpConstr;
+		mt_ZERO_NODE_SET($heelPivot[0]);
+		parent $ball_Handle[0] $heelPivot[0];
+		mt_ZERO_NODE_PARENT($anklePivot[0], $heelPivot[0]);
+		mt_ZERO_NODE_PARENT($toePivot[0], $heelPivot[0]);
+	string $toeGroup[] = `spaceLocator -n ($toe_Jnt + "_Group")`; 
+		$tmpConstr =`parentConstraint $toe_Jnt $toeGroup[0]`;						delete $tmpConstr;
+		mt_ZERO_NODE_SET($toeGroup[0]);
+		mt_ZERO_NODE_PARENT($heelPivot[0], $toeGroup[0]);
+	string $footGroup[] = `spaceLocator -n ($foot_Cont+"_Group")`; 
+		$tmpConstr =`parentConstraint $heel_Jnt $footGroup[0]`;						delete $tmpConstr;
+		//$tmpConstr =`pointConstraint $heel_Jnt $footGroup[0]`;						delete $tmpConstr;
+		//$tmpConstr = `aimConstraint -aim 0 0 1 -u 0 1 0 $toe_Jnt $footGroup[0]`;		delete $tmpConstr;
+	string $footControl[] = mtGenControl($footGroup[0], $foot_Cont, "foot", (0.5* $mtScale), "Z");		delete $footGroup[0];	
+		float $vecPos[] = `xform -q -ws -t $ankle_Jnt`;	xform -ws -t $vecPos[0] $vecPos[1] $vecPos[2] ($footControl[0]+".rotatePivot");
+		mt_ZERO_NODE_PARENT( $toeGroup[0], $footControl[0]);
+
+		//Local Foot Target
+	string $heelTarget[] = `duplicate -po -rr -n ($heel_Jnt + "_Pivot_Target") $heelPivot[0]`;
+	string $tempTarget[] = `spaceLocator -n ($ankle_Jnt + "_Local")`;
+		$tmpConstr =`pointConstraint $ankle_Jnt $tempTarget[0]`;									delete $tmpConstr;
+		xform -ws -r -ro 0 -90 0 $tempTarget[0];
+	string $localTarget[] = mtGenControl($tempTarget[0], "globalTarget", "textL", (0.35* $mtScale), "XYZ");	delete $tempTarget;
+	string $localTargetConstraint[] = `parentConstraint -mo $localTarget[0] $heelTarget[0] $heelPivot[0]`;
+		setAttr ($localTargetConstraint[0]+".interpType") 2;	//??? reduces chance of flipping
+
+	addAttr -ln "ikBlend"  -min 0 -max 10 -dv 10 -keyable true $footControl[0];
+	addAttr -ln "KneeTwist"  -min -10 -max 10 -dv 0 -keyable true $footControl[0] ;
+	addAttr -ln "Roll"  -min -5 -max 10 -dv 0 -keyable true $footControl[0] ;
+	addAttr -ln "ToeTwist"  -min -45 -max 45 -dv 0 -keyable true $footControl[0] ;
+	addAttr -ln "FootLean"  -min -45 -max 45 -dv 0 -keyable true $footControl[0] ;
+	addAttr -ln "footToCOG"  -min 0 -max 10 -dv 0 -keyable true $footControl[0];
+			//variables to tweak footroll behavior
+		addAttr -ln "__KneeTWIST_OFFSET"  -min -180 -max 180 -dv (90 * $num) -keyable true $footControl[0] ;
+		addAttr -ln "__rollHEEL_OFFSET"  -min -10 -max 10 -dv 6 -keyable true $footControl[0] ;
+		addAttr -ln "__rollANKLE_OFFSET"  -min -10 -max 10 -dv 4 -keyable true $footControl[0] ;
+		addAttr -ln "__rollTOE_OFFSET"  -min -10 -max 10 -dv 3.5 -keyable true $footControl[0] ;
+
+	string $codeBlock = 
+		"    //IKBlend	\r"+	
+		$ankle_Handle[0] +".ikBlend = " + $ball_Handle[0] +".ikBlend = " + $toe_Handle[0] +".ikBlend = " 
+			+ $footControl[0] +".ikBlend * 0.1;	\r"+	
+		"    //Knee Twist	\r"+
+		$ankle_Handle[0] +".twist = ("+$footControl[0]+".KneeTwist * 9.0) + "  + $footControl[0]+".__KneeTWIST_OFFSET ;	\r"+
+		"    //Toe Twist	\r"+	
+		$toeGroup[0] +".rz = "+$footControl[0]+".ToeTwist * 4.5;	\r"+	
+		"    //Foot Lean left and right	\r"+	
+		$toeGroup[0] +".rx = "+$footControl[0]+".FootLean * 2;	\r"+
+		"    //Foot Roll	\r"+
+		$heelTarget[0] +".ry = clamp(-5, 0,"+$footControl[0]+".Roll) * "+$footControl[0]+".__rollHEEL_OFFSET;	\r"+
+		$anklePivot[0] +".ry = clamp(0, 5,"+$footControl[0]+".Roll) * "+$footControl[0]+".__rollANKLE_OFFSET;	\r"+
+		$toeGroup[0] +".ry = (clamp(5, 10,"+$footControl[0]+".Roll) - 5) * "+$footControl[0]+".__rollTOE_OFFSET;	\r"+
+		"    //Foot: World to COG switching	\r"+
+		$localTargetConstraint[0] + "." + $localTarget[0] + "W0 = " +  $localTarget[0]+".visibility = " + $footControl[0] +".footToCOG;	\r"+
+		$localTargetConstraint[0]+"."+$heelTarget[0]+"W1 = " + $localTargetConstraint[0]+"."+$heelTarget[0]+"W1 = 10.0 - " + $footControl[0] +".footToCOG;";
+
+	if($stretchIK == 1){	//yes stretch
+		string $codeBlockIK =  mtStretchyIK_Exp($hip_Jnt, $ankle_Jnt, $ankle_Handle[0]);
+		$codeBlock = $codeBlock + $codeBlockIK;
+	}
+	expression -n ($foot_Cont + "_EXP") -s ($codeBlock);	
+		//Setup FK switch
+	string $FK_jointCollection[] = `listRelatives -ad -c $hip_Jnt`;
+	jointFK_xform($hip_Jnt, ($footControl[0] +".ikBlend"));
+	for($joint in $FK_jointCollection){
+		jointFK_xform($joint, ($footControl[0] +".ikBlend"));
+	}
+
+	return {$footControl[0], $localTarget[0], $poleConsObj[0]};
+}														//mtLeg_IK("L_hip", "L_ankle", "L_heel" , "L_ball", "L_toe", "L_foot");
+
+
+proc string[] mtRigFingers(string $wristNode){
+global float $mtScale;
+	string $fingControl[] = mtGenControl_Joystick($wristNode, "wristSliders", 1 );
+	string $thumbControl[] = `duplicate -rr -n ($fingControl[0]+"_Thumb") $fingControl[0]`;
+	string $returnControl[] = `listRelatives -p $fingControl[0]`;
+	string $fingers[] = `listRelatives $wristNode`;
+		//spread
+	setDrivenKeyframe -cd ($thumbControl[0] +".ty") -dv 0 -v 0 -itt "spline" -ott "spline" ($fingers[0] +".ry");
+	setDrivenKeyframe -cd ($thumbControl[0] +".ty") -dv 1 -v 50 -itt "spline" -ott "spline" ($fingers[0] +".ry");
+	setDrivenKeyframe -cd ($thumbControl[0] +".ty") -dv -1 -v -25 -itt "spline" -ott "spline" ($fingers[0] +".ry");
+
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 0 -v 0 -itt "spline" -ott "spline" ($fingers[1] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 1 -v -5 -itt "spline" -ott "spline" ($fingers[1] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv -1 -v 30 -itt "spline" -ott "spline" ($fingers[1] +".rz");
+
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 0 -v 0 -itt "spline" -ott "spline" ($fingers[2] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 1 -v -5 -itt "spline" -ott "spline" ($fingers[2] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv -1 -v 10 -itt "spline" -ott "spline" ($fingers[2] +".rz");
+
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 0 -v 0 -itt "spline" -ott "spline" ($fingers[3] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 1 -v 10 -itt "spline" -ott "spline" ($fingers[3] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv -1 -v -10 -itt "spline" -ott "spline" ($fingers[3] +".rz");
+
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 0 -v 0 -itt "spline" -ott "spline" ($fingers[4] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv 1 -v 15 -itt "spline" -ott "spline" ($fingers[4] +".rz");
+	setDrivenKeyframe -cd ($fingControl[0] +".ty") -dv -1 -v -30 -itt "spline" -ott "spline" ($fingers[4] +".rz");
+		//bend
+	int $isThumb = 1;
+		float $offSet = 0.0;
+		float $offSetThumb = 0.85;
+	for($fing in $fingers){
+		if($isThumb == 1){
+			setDrivenKeyframe -cd ($thumbControl[0] +".tx") -dv 0 -v 0 -itt "spline" -ott "spline" ($fing +".rz");
+			setDrivenKeyframe -cd ($thumbControl[0] +".tx") -dv 1 -v -30 -itt "spline" -ott "spline" ($fing +".rz");
+			setDrivenKeyframe -cd ($thumbControl[0] +".tx") -dv -1 -v 25 -itt "spline" -ott "spline" ($fing +".rz");
+
+			string $finJoints[] = `listRelatives -ad $fing`;
+	
+			for($joints in $finJoints){
+				setDrivenKeyframe -cd ($thumbControl[0] +".tx") -dv 0 -v 0 -itt "spline" -ott "spline" ($joints +".rz");
+				setDrivenKeyframe -cd ($thumbControl[0] +".tx") -dv (1 - ($offSetThumb)) -v -100 -itt "spline" -ott "spline" ($joints +".rz");
+				setDrivenKeyframe -cd ($thumbControl[0] +".tx") -dv -1 -v 15 -itt "spline" -ott "spline" ($joints +".rz");
+				$offSetThumb -= 0.65;
+			}
+			$isThumb = 0;
+		}
+		else{
+			setDrivenKeyframe -cd ($fingControl[0] +".tx") -dv 0 -v 0 -itt "spline" -ott "spline" ($fing +".ry");
+			setDrivenKeyframe -cd ($fingControl[0] +".tx") -dv (1 - $offSet) -v 60 -itt "spline" -ott "spline" ($fing +".ry");
+			setDrivenKeyframe -cd ($fingControl[0] +".tx") -dv -1 -v -15 -itt "spline" -ott "spline" ($fing +".ry");
+		
+			string $finJoints[] = `listRelatives -ad $fing`;
+			float $offset2 = 0.75;
+			for($joints in $finJoints){
+				setDrivenKeyframe -cd ($fingControl[0] +".tx") -dv 0 -v 0 -itt "spline" -ott "spline" ($joints +".ry");
+				setDrivenKeyframe -cd ($fingControl[0] +".tx") -dv (1 - $offset2) -v 90 -itt "spline" -ott "spline" ($joints +".ry");
+				setDrivenKeyframe -cd ($fingControl[0] +".tx") -dv -1 -v -10 -itt "spline" -ott "spline" ($joints +".ry");
+				$offset2 -= 0.25;
+			}
+			$offSet += 0.25;
+		}
+	}
+		//cleanup control UI -- HACK!!!
+	xform -r -s ( 0.5) (0.5) (0.5) $thumbControl[0];
+	string $xformNodeP[] = `listRelatives -p $fingControl[0]`;
+		float $posNode[] = `xform -q -a -ws -t $wristNode`;
+		float $num = 1.0;
+	if($posNode[0] < 0.0){	$num = -$num;	};		//if true this is likely R_wrist
+	string $pointConstraintt[] = `listConnections -d off -s on ($xformNodeP[0]+".tx")`;
+		setAttr ($pointConstraintt[0]+".offsetX") (0.25*$mtScale * -$num);
+		setAttr ($pointConstraintt[0]+".offsetY") (0.25*$mtScale * -$num);
+	string $orientConstraintt[] = `listConnections -d off -s on ($xformNodeP[0]+".rx")`;
+		setAttr ($orientConstraintt[0]+".offsetX") (90 * $num);
+	xform -a -s (0.3 * $mtScale * $num) (0.3 * $mtScale) (0.3 * $mtScale) $xformNodeP[0];
+
+	return $returnControl;
+}														//mtRigFingers("L_wrist"); 
+
+
+proc string[] mtHead_IK(string $neck_jnt, string $head_jnt){
+global float $mtScale;
+	string $tempLocator[] = `spaceLocator -n ($neck_jnt + "_Loc")`;
+		string $tmpConstr[] =`parentConstraint $neck_jnt $tempLocator[0]`;					delete $tmpConstr;
+	string $neckPivot[] =  mtGenControl($tempLocator[0], "neck", "octag", (0.5 * $mtScale), "X");				delete $tempLocator[0];
+		orientConstraint -mo $neckPivot[0] $neck_jnt;
+		pointConstraint -mo $neck_jnt $neckPivot[0];
+
+	string $tempLocator[] = `spaceLocator -n ($head_jnt + "_Loc")`;
+		$tmpConstr =`parentConstraint $head_jnt $tempLocator[0]`;							delete $tmpConstr;
+	string $headPivot[] = mtGenControl($tempLocator[0], "neck", "octag", (0.5 * $mtScale), "X");				delete $tempLocator[0];
+		orientConstraint -mo $headPivot[0] $head_jnt;
+		pointConstraint -mo $head_jnt $headPivot[0];
+	mt_ZERO_NODE_PARENT($headPivot[0], $neckPivot[0]);
+
+	mtLocknHide_Attr($neckPivot[0], "trn");
+	mtLocknHide_Attr($headPivot[0], "trn");
+
+	return $neckPivot;
+}														//mtHead_IK("Neck_1", "Head_1");
+
+
+/***********************UI CONTROL OBJ***********************/
+
+
+proc string[] mtGenControl( string $xformNode, string $groupIN, string $typeIN , float $radiusIN, string $upVecIN){
+global float $mtScale;
+	int $vecUP[] = {0, 1, 0};
+	$upVecIN = `toupper $upVecIN`;
+	if		($upVecIN == "X")	{	$vecUP = {1, 0, 0};		}	//X up	
+	else if	($upVecIN == "Y")		{	$vecUP = {0, 1, 0};		}	//Y up
+	else 					{	$vecUP = {0, 0, 1};		}	//Z up
+	if(`objExists $xformNode`){
+		string $controlObj[];
+		float $pos[] = `xform -q -ws -rp $xformNode`;
+		float $rot[] = `xform -q -ws -ro $xformNode`;
+
+		if		($typeIN == "circle")	{	$controlObj =  `circle  -n ("cnt_" +$xformNode) -r $radiusIN -d 2 -s 4 -nr $vecUP[0] $vecUP[1] $vecUP[2]`;		}
+		else if	($typeIN == "octag")	{	$controlObj =  `circle  -n ("cnt_" +$xformNode) -r $radiusIN -d 1 -s 6 -nr $vecUP[0] $vecUP[1] $vecUP[2]`;		}
+		else if	($typeIN == "diam")	{	$controlObj =  `circle  -n ("cnt_" +$xformNode) -r $radiusIN -d 1 -s 4 -nr $vecUP[0] $vecUP[1] $vecUP[2]`;		}
+		else if	($typeIN == "textG")	{	$controlObj =  mtGenLetterNurb("cnt_" +$xformNode, "G", $radiusIN);										}
+		else if	($typeIN == "textL")	{	$controlObj =  mtGenLetterNurb("cnt_" +$xformNode, "L", $radiusIN);										}
+		else if	($typeIN == "foot")	{	float $rotVec[] = {0, 180 , 0}; // {$rot[0], $rot[1], $rot[2]};			//foot
+										$controlObj =  mtDropletShape(("cnt_" +$xformNode), "end", $radiusIN, $rotVec);	}	//pivot at center
+		else if	($typeIN == "spine")	{	float $rotVec[] = {0, 180, 90};		//spine
+										$controlObj =  mtDropletShape(("cnt_" +$xformNode), "tip", $radiusIN, $rotVec);	}	//pivot at point/tip
+		else if	($typeIN == "shoul")	{	float $rotVec[] = {90, 180, 0};		//shoulder
+										$controlObj =  mtDropletShape(("cnt_" +$xformNode), "tip", $radiusIN, $rotVec);	}	//pivot at point/tip
+		else if	($typeIN == "root")	{	$controlObj = `circle -n  ("cnt_" +$xformNode) -r $radiusIN -d 1 -s 48 -nr $vecUP[0] $vecUP[1] $vecUP[2]`;
+											select  ($controlObj[0] + ".cv[0]")  ($controlObj[0] + ".cv[12]") ($controlObj[0] + ".cv[24]") ($controlObj[0] + ".cv[36]") ;
+											scale -r 1.25 1.25 1.25;
+											select -cl  ;															}	//root node
+		else{
+				//trans cube
+			$controlObj = `polyCube -n ("cnt_" +$xformNode) -w $radiusIN -h $radiusIN -d $radiusIN`;
+			//setAttr ($controlObj[0]+".overrideEnabled") 1;
+			//setAttr ($controlObj[0]+".overrideLevelOfDetail") 1;	//set to bounding box
+		}
+		
+		xform -ws -t $pos[0] $pos[1] $pos[2] $controlObj[0];
+		xform -ws -ro $rot[0] $rot[1] $rot[2] $controlObj[0];
+		mt_ZERO_NODE_SET($controlObj[0]);
+			delete -ch $controlObj[0];							
+			mtLocknHide_Attr($controlObj[0], "scl"); 
+		
+		if($groupIN == ""){	$groupIN = "default";	};
+		addAttr -ln "mtControlNode" -dt "string"  $controlObj[0];
+		setAttr -type "string"  ($controlObj[0] + ".mtControlNode") $groupIN;
+
+		return $controlObj;
+	}
+	else{		
+		print("ERROR : " + $xformNode + " doesn't exist.");		
+	}
+}														//mtGenControl("XformNode", "Group", "Type:circle", 2.5, "UpVector:XYZ");
+
+
+proc string[] mtGenControl_Joystick( string $xformNode, string $groupIN, int $follower){
+	if(`objExists $xformNode`){
+		string $controlObj[] 	= `circle  -n ("jStick_" +$xformNode) -r 0.25 -d 2 -nr 0 0 1`;
+			mtLocknHide_Attr($controlObj[0], "scl");
+			mtLocknHide_Attr($controlObj[0], "rot");
+		string $posNode[] 		= `spaceLocator -n ($controlObj[0] + "_posNode")`;
+			parent $controlObj[0] $posNode[0];
+			transformLimits -etx on on -ety on on -etz on on -tx -1.0 1.0 -ty -1.0 1.0 -tz 0.0 0.0 $controlObj[0];
+		string $dispNode[] 	= `circle  -n ($xformNode + "_dispNode") -r 1.41 -d 1 -s 4 -nr 0 0 1`;
+			xform -a -ws -ro 0 0 45 $dispNode[0];
+			makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $dispNode[0];
+			delete -ch $dispNode[0];
+			setAttr ($dispNode[0] + ".overrideEnabled") 1;
+			setAttr ($dispNode[0] + ".overrideDisplayType") 2;	//Reference display
+			parent $dispNode[0] $posNode[0];
+		
+		float $pos[] = `xform -q -ws -rp $xformNode`;
+		float $rot[] = `xform -q -ws -ro $xformNode`;
+
+		xform -ws -t $pos[0] $pos[1] $pos[2] $posNode[0];
+		xform -ws -ro $rot[0] $rot[1] $rot[2] $posNode[0];
+
+		mt_ZERO_NODE_SET($posNode[0]);
+			delete -ch $controlObj[0];
+
+		if($follower = 1){
+			string $pConstraint[] = `pointConstraint   $xformNode $posNode[0]`;
+			string $oConstraint[] = `orientConstraint  $xformNode $posNode[0]`;
+				setAttr ($oConstraint[0] + ".interpType") 2;		//interp Type = shortest; reduce chance of flipping	??
+		}
+		else{
+			string $pConstraint[] = `pointConstraint  $posNode[0] $xformNode`;
+			string $oConstraint[] = `orientConstraint  $posNode[0] $xformNode`;
+				setAttr ($oConstraint[0] + ".interpType") 2;		//interp Type = shortest; reduce chance of flipping	??
+		}
+			
+		if($groupIN == ""){	$groupIN = "default";	};
+		addAttr -ln "mtControlNode" -dt "string"  $controlObj[0];
+		setAttr -type "string"  ($controlObj[0] + ".mtControlNode") $groupIN;
+
+		return $controlObj;
+	}
+	else{		
+		print("ERROR : " + $xformNode + " doesn't exist.");		
+	}
+}														//mtGenControl_Joystick("wristNode", "wristSliders", 1 );
+
+proc string[] mtDropletShape(string $nameIN, string $pivotLocation, float $radiusIN, float $rotVec[]){
+		//builds a tear shape nurb surface
+	string $mtCircle[] = `circle -n $nameIN -ch off -o on -nr 0 1 0 -r $radiusIN -d 3 -s 12`;
+	float $offSet = $radiusIN * 1.5;
+		xform -r -ws -t 0 0 (-$offSet) ($mtCircle[0]+".cv[1]"); 
+		xform -a -ws -ro $rotVec[0] $rotVec[1] $rotVec[2] $mtCircle[0];	//orient droplet
+	if($pivotLocation == "tip"){
+		float $pivPos[] = `xform -q -a -ws -t ($mtCircle[0]+".ep[0]")`;
+		xform -a -ws -t (-$pivPos[0]) (-$pivPos[1]) (-$pivPos[2]) $mtCircle[0]; 
+		xform -a -ws -rp 0 0 0 $mtCircle[0]; 		//reset rotate pivot
+		xform -a -ws -sp 0 0 0 $mtCircle[0]; 		//reset scale pivot
+	}
+	if($pivotLocation == "end"){
+		float $pivPos[] = `xform -q -a -ws -t ($mtCircle[0]+".ep[6]")`;
+		xform -a -ws -t (-$pivPos[0]) (-$pivPos[1]) (-$pivPos[2] + -$offSet * 0.25) $mtCircle[0]; 
+		xform -a -ws -rp 0 0 0 $mtCircle[0]; 		//reset rotate pivot
+		xform -a -ws -sp 0 0 0 $mtCircle[0]; 		//reset scale pivot
+	}
+	makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $mtCircle[0]; 
+	
+	return $mtCircle;
+}														//mtDropletShape(("cnt_xformNode", "end", 0.5, $rotVec);
+
+proc string[] mt_ZERO_NODE_PARENT( string $childNode, string $parentNode){
+		//parents null instead of zerod out control object
+	string $zeroNodeDNT2[] =`listRelatives -p -typ "transform" $childNode`;
+	parent $zeroNodeDNT2[0] $parentNode;
+	return  $zeroNodeDNT2;
+}														//mt_ZERO_NODE_SET( "childNode", "parentNode")
+
+proc string mt_ZERO_NODE_SET(string $objectTarget){
+	float $pos[] = `xform -q -ws -rp $objectTarget`;
+	float $rot[] = `xform -q -ws -ro $objectTarget`;
+	string $zeroNode = `group -em -n ($objectTarget + "_ZERO_NODE_DNT")`;
+		xform -ws -t $pos[0] $pos[1] $pos[2] $zeroNode;	//Screws up rotation--WHY??? : string $zeroConstraint[] = `parentConstraint $objectTarget $zeroNode`;
+		xform -ws -ro $rot[0] $rot[1] $rot[2] $zeroNode;	//	delete $zeroConstraint[0];
+	parent $objectTarget $zeroNode;
+		mtLocknHide_Attr($zeroNode, "all");
+		//delete -ch $controlObj[0];
+	return  $zeroNode;
+}														//mt_ZERO_NODE_SET($objectTarget);
+
+proc string[] mtGenLetterNurb(string $nameIN, string $charIN, float $size){
+	string $textGroup[] = `textCurves -n $nameIN -ch 0 -f "Arial-Regular" -t $charIN`;
+	string $textObj[] = `listRelatives -ad $textGroup[0]`;
+	string $wordShape[];
+	for($word in $textObj){
+		if ( `nodeType $word` == "nurbsCurve" ) {
+			string $parentTemp[] = `listRelatives -p $word`;
+			$wordShape = `parent -w $parentTemp[0]`;
+		}
+	}
+		delete $textGroup;
+	string $returnObj[]; 
+	$returnObj[0]= `rename $wordShape[0] $nameIN`;
+		select -r $returnObj[0];
+	selectCurveCV("all");
+	string $wordShapeCV[] = `filterExpand -sm 28`;
+	float $sumCVPos[] = {0.0, 0.0, 0.0};
+	float $pivPos[] = {0.0, 0.0, 0.0};
+	int	$count = size($wordShapeCV);
+	
+	for($CV in $wordShapeCV){
+
+		float $tempPos[] = `xform -q -a -ws -t $CV`;
+			$sumCVPos[0] += $tempPos[0];
+			$sumCVPos[1] += $tempPos[1];
+			$sumCVPos[2] += $tempPos[2];
+	}
+	$pivPos[0] = $sumCVPos[0]/$count;
+	$pivPos[1] = $sumCVPos[1]/$count;
+	$pivPos[2] = $sumCVPos[2]/$count;
+		xform -a -ws -rp $pivPos[0] $pivPos[1] $pivPos[2] $returnObj[0];
+
+ 		//center rotate pivot to CV
+		xform -a -ws -sp $pivPos[0] $pivPos[1] $pivPos[2] $returnObj[0]; 
+
+		//center scale pivot to CV
+		xform -a -s $size $size $size $returnObj[0];
+		xform -a -ws -t (-$pivPos[0]) (-$pivPos[1]) (-$pivPos[2]) $returnObj[0];	//reset overall object to world
+		makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $returnObj[0]; 
+		select -r $returnObj[0];
+	return $returnObj;
+}														//mtGenLetterNurb("Name", "G", 0.25);
+
+
+/***********************UTILITIES***********************/
+
+
+global proc float distance2Pts( float $p1[], float $p2[] ){
+	float $distance;
+	float $v[3];
+		$v[0] = $p1[0] - $p2[0];
+		$v[1] = $p1[1] - $p2[1];
+		$v[2] = $p1[2] - $p2[2];
+	$distance = $v[0]*$v[0] + $v[1]*$v[1] + $v[2]*$v[2];
+	$distance = sqrt( $distance );
+
+	return $distance;
+}														//distance2Pts($rootPos, $midPos);
+
+proc mtLocknHide_Attr(string $object, string $attr){
+	string $attrCollection[];
+
+	switch($attr){
+		case "trn" :
+			$attrCollection = {"tx", "ty", "tz"}; 
+			break;
+		case "rot" :
+			$attrCollection = {"rx", "ry", "rz"}; 
+			break;
+		case "scl" :
+			$attrCollection = {"sx", "sy", "sz"}; 
+			break;
+		case "all" :
+			$attrCollection = `listAttr -k $object`;
+			if(`objExists ($object +"Shape.visibility")`){
+				setAttr ($object +"Shape.visibility") 0ff;		//hide the node's shape
+			}
+			else if(`objExists ($object +".visibility")`){
+				//setAttr ($object +".visibility") 0ff;			//hide the node
+			}
+			break;
+	}
+	
+	for($attr in $attrCollection){
+		//setAttr -lock true ($object+"."+$attr);			//lock
+		setAttr -e -keyable false ($object+"."+$attr);	//hide
+	}
+	setAttr -e -keyable false ($object+".visibility");	//hide
+}														//mtLocknHide_Attr($controlObj[0], "scl");
+
+proc jointFK_xform(string $jointIN, string $driverIN){
+	setDrivenKeyframe -cd $driverIN -dv 0 -v 1 -itt "spline" -ott "spline"  ($jointIN+".displayHandle");
+	setDrivenKeyframe -cd $driverIN -dv 1 -v 0 -itt "spline" -ott "spline" ($jointIN+".displayHandle");
+	setDrivenKeyframe -cd $driverIN -dv 0 -v 0.5 -itt "spline" -ott "spline"  ($jointIN+".selectHandleY");
+	setDrivenKeyframe -cd $driverIN -dv 1 -v 0 -itt "spline" -ott "spline"  ($jointIN+".selectHandleY");
+}														//jointFK_xform($joint, ($ikHandle[0] +".ikBlend"));
+
+proc string mtStretchyIK_Exp(string $jointStart, string $jointEnd, string $ikHandle){
+	float $pos_Root[] = `xform -q -ws -t $jointStart`;
+	float $pos_End[] = `xform -q -ws -rp $ikHandle`;
+	string $codeString;
+		//set up and rig distance measure
+	string $distTape = `distanceDimension -sp $pos_Root[0] $pos_Root[1] $pos_Root[2] -ep $pos_End[0] $pos_End[1] $pos_End[2]`;
+	string $distTapeNode[] = `listRelatives -p $distTape`;	//get dist attr from xform node instead of shape node; else strange cycle error
+	string $locators[] = `listConnections $distTape`;
+	//pointConstraint $jointStart $locators[0] ;
+	//pointConstraint $ikHandle $locators[1] ;
+	parent -a $locators[0] $jointStart;
+	parent -a $locators[1] $ikHandle;
+		//get chain segment to apply stretch(scaleX)
+	select -hi $jointStart;
+	string $jointChain[] = `ls -sl`;
+	string $jointScaleColl[];
+	float $jointLengthSum = 0.0;
+
+	int $counter = 0;
+		//fine length of chain by adding up each individual joint
+	for($joint in $jointChain){
+		if(	$joint == $jointEnd	){		break;		}
+		else{
+			$jointScaleColl[$counter] = $joint;
+			float $jointLength = `getAttr ($jointChain[($counter +1)] + ".translateX")`;		//get joint end point; tx of child joint
+			//addAttr -ln "inLength" -dv $jointLength -keyable true -at double $joint;
+			$jointLengthSum += $jointLength;
+			$counter++;
+		}
+	}
+	$jointLengthSum = abs($jointLengthSum);	
+
+	$codeString =
+		"\r    //Arm: Stretchy IK	\r"+	 	
+		"if ("+$distTapeNode[0] + ".distance >= "+$jointLengthSum+"){	\r";	
+	for($joint in $jointScaleColl)	{
+		$codeString +="	" +$joint+".scaleX = ";
+	}
+	$codeString +=
+		" "+($distTapeNode[0] + ".distance")+"/"+$jointLengthSum+";\r" +
+		"}\r"+	
+		"else{\r";
+	for($joint in $jointScaleColl)	{
+		$codeString += "	"+$joint+".scaleX = "; 
+	}
+	$codeString +=
+		" 1.0;\r" +
+		"};";
+
+	return $codeString;
+}														//mtStretchyIK_Exp("joint1", "joint3", "ikHandle1");
+
+

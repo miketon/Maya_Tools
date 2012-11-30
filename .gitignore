@@ -1,0 +1,6 @@
+# Ignore The following directories / file extensions
+valgrind-3.7.0
+
+# Ignore the following file extensions
+*.swp
+*.DS_Store

@@ -1,0 +1,199 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+#Window:Pos=RightTop
+; You can also specify window position by the coordinate.
+;#Window:X=0
+;#Window:Y=0
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+#Window:MarginTop=0
+;#Window:MarginRight=0
+#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 ;----------------- Row 1 -------------------
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 50
+	Image1=img\AD_HTopoGun.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Back
+#Control:MenuDock
+	Name=MenuDock
+	Pos=50, 0, 50, 50
+	Image1=img\AD_Back.bmp
+	Image2=img\AD_DownButton.bmp
+;-------------------------------- ToolSet1 Buttons --------------------------------
+#ControlOffset:0, 50 ;----------------- ROW 2 -------------------
+
+; HSlider - Tab
+#Control:HSlider
+	Name=Tab
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{s Down}{s Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{o Down}{o Up}{Ctrl Up}
+	TouchKey={Tab Down}{Tab Up}
+	Image1=img\AD_Tab.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 3 -------------------
+
+; HSlider - Undo
+#Control:HSlider
+	Name=Undo
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{y Down}{y Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	TouchKey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	Image1=img\AD_Undo.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 4 -------------------
+
+; HSlider - Display
+#Control:HSlider
+	Name=Display
+	Pos=0, 0, 100, 50
+	Step=20
+	;Left
+	Upkey={4 Down}{4 Up}
+	;Right
+	Downkey={5 Down}{5 Up}
+	TouchKey={6 Down}{6 Up}
+	Image1=img\AD_DisplayRef.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 5 -------------------
+
+; VSlider - Tools
+#Control:VSlider
+	Name=Tools
+	Pos=0, 0, 50, 80
+	Step=10
+	Upkey={n Down}{n Up}
+	Downkey={w Down}{w Up}
+	TouchKey={q Down}{q Up}
+	Image1=img\AD_Tools.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Right Click
+#Control:Key
+	Name=RClick
+	Pos=50, 0, 50, 80
+	DownKey={RButton Down}
+	UpKey={RButton Up}
+	Image1=img\AD_RMB.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 6 -------------------
+
+; Shift
+#Control:Key
+	Name=Shift
+	Pos=0, 0, 100, 50
+	DownKey={Shift Down}
+	UpKey={Shift Up}
+	Image1=img\AD_SplitEdge.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 7 -------------------
+
+; Ctrl
+#Control:Key
+	Name=Ctrl
+	Pos=0, 0, 100, 50
+	DownKey={Ctrl Down}
+	UpKey={Ctrl Up}
+	Image1=img\AD_SnapVert.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 8 -------------------
+
+; View Rotate
+#Control:Key
+	Name=VRotate
+	Pos=0, 0, 100, 100
+	DownKey={Alt Down}
+	UpKey={Alt Up}
+	Image1=img\AD_CameraR2.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 9 -------------------
+
+; Pan
+#Control:Key
+	Name=Pan
+	Pos=0, 0, 100, 100
+	DownKey={Alt Down}{MButton Down}
+	UpKey={MButton Up}{Alt Up}
+	Image1=img\AD_PanZoom2.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 10 -------------------
+
+; VSlider - SteadyMouse Merge Repeat
+#Control:VSliderDelay
+	Name=Merge
+	Pos=0, 0, 50, 90
+	Step=10
+	UpKey={m Down}{m Up}
+	DownKey={g Down}{g Up}
+	TouchKey={Alt Down}{c Down}{c Up}{Alt Up}
+	Image1=img\AD_Merge.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - Mirror Del ClearHistory
+#Control:VSliderDelay
+	Name=Del
+	Pos=50, 0, 50, 90
+	Step=10
+	UpKey={x Down}{x Up}
+	DownKey={Ctrl Down}{Shift Down}{z Down}{z Up}{Shift Up}{Ctrl Up}
+	TouchKey={Delete Down}{Delete Up}
+	Image1=img\AD_Del.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 90 ;----------------- ROW 11 -------------------
+
+; View All
+#Control:Key
+	Name=ViewAll
+	Pos=0, 0, 50, 50
+	DownKey={a Down}
+	UpKey={a Up}
+	Image1=img\AD_ViewAll.bmp
+	Image2=img\AD_DownButton.bmp
+
+; View Frame
+#Control:Key
+	Name=ViewFrame
+	Pos=50, 0, 50, 50
+	DownKey={f Down}
+	UpKey={f Up}
+	Image1=img\AD_ViewF.bmp
+	Image2=img\AD_DownButton.bmp

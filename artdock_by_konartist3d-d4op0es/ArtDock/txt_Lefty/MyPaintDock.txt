@@ -1,0 +1,216 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+#Window:Pos=RightTop
+; You can also specify window position by the coordinate.
+;#Window:X=0
+;#Window:Y=0
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+#Window:MarginTop=0
+;#Window:MarginRight=0
+#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 ;----------------- Row 1 -------------------
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 50
+	Image1=img\AD_HMyPaint.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Back
+#Control:MenuDock
+	Name=MenuDock
+	Pos=50, 0, 50, 50
+	Image1=img\AD_Back.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 2 -------------------
+
+; HSlider - Tab
+#Control:HSlider
+	Name=Tab
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{s Down}{s Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{o Down}{o Up}{Ctrl Up}
+	TouchKey={Tab Down}{Tab Up}
+	Image1=img\AD_Tab.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 3 -------------------
+
+; HSlider - Undo
+#Control:HSlider
+	Name=Undo
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={y Down}{y Up}
+	;Right
+	Downkey={z Down}{z Up}
+	TouchKey={z Down}{z Up}
+	Image1=img\AD_Undo.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 4 -------------------
+
+; Layer
+#Control:Key
+	Name=Layer
+	Pos=0, 0, 50, 50
+	DownKey={l Down}
+	UpKey={l Up}
+	Image1=img\AD_Layer.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Mirror
+#Control:Key
+	Name=Mirror
+	Pos=50, 0, 50, 50
+	DownKey={i Down}
+	UpKey={i Up}
+	Image1=img\AD_Mirror.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 5 -------------------
+
+; VSlider - Zoom Slider
+#Control:VSlider
+	Name=ZoomSlider
+	Pos=0, 0, 50, 80
+	Step=20
+	UpKey=.
+	DownKey=,
+	TouchKey={F12 Down}{F12 Up}
+	Image1=img\AD_Zoom.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - Opacity
+#Control:VSlider
+	Name=OpacitySlider
+	Pos=50, 0, 50, 80
+	Step=15
+	Upkey={s Down}{s Up}
+	Downkey={a Down}{a Up}
+	TouchKey=
+	Image1=img\AD_Opacity.bmp
+	Image2=img\AD_DownButton.bmp
+
+
+#ControlOffset:0, 80 ;----------------- ROW 6 -------------------
+
+; VSlider - Brush Size Slider
+#Control:VSlider
+	Name=BrushSizeSlider
+	Pos=0, 0, 50, 80
+	Step=15
+	Upkey={] Down}{] Up}
+	Downkey={[ Down}{[ Up}
+	TouchKey={RButton}
+	Image1=img\AD_BrushSize.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - Paint Slider
+#Control:VSliderDelay
+	Name=PaintSlider
+	Pos=50, 0, 50, 80
+	Step=10
+	Upkey={x Down}{x Up}
+	Downkey={e Down}{e Up}
+	TouchKey={1 Down}{1 Up}
+	Image1=img\AD_Brush2.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 7 -------------------
+
+; Alt
+#Control:Key
+	Name=Alt
+	Pos=0, 0, 100, 100
+	DownKey={Alt Down}
+	UpKey={Alt Up}
+	Image1=img\AD_Picker.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 8 -------------------
+
+; Space key - Control type: Key
+#Control:Key
+	Name=Space
+	Pos=0, 0, 100, 100
+	DownKey={Space Down}
+	UpKey={Space Up}
+	Image1=img\AD_Move100.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 9 ---------------------------------
+
+; Custom Brush 1
+#Control:Key
+	Name=CustomBrush1
+	Pos=0, 0, 50, 50
+	DownKey={1 Down}
+	UpKey={1 Up}
+	Image1=img\AD_1s.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Custom Brush 2
+#Control:Key
+	Name=CustomBrush2
+	Pos=50, 0, 50, 50
+	DownKey={2 Down}
+	UpKey={2 Up}
+	Image1=img\AD_2s.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 10 ---------------------------------
+
+; Custom Brush 3
+#Control:Key
+	Name=CustomBrush3
+	Pos=0, 0, 50, 50
+	DownKey={3 Down}
+	UpKey={3 Up}
+	Image1=img\AD_3s.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Custom Brush 4
+#Control:Key
+	Name=CustomBrush4
+	Pos=50, 0, 50, 50
+	DownKey={4 Down}
+	UpKey={4 Up}
+	Image1=img\AD_4s.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 11 -------------------
+
+; Ctrl
+#Control:Key
+	Name=Ctrl
+	Pos=0, 0, 100, 60
+	DownKey={Ctrl Down}
+	UpKey={Ctrl Up}
+	Image1=img\AD_Ctrl2.bmp
+	Image2=img\AD_DownButton.bmp

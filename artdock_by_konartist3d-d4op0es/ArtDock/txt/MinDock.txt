@@ -1,0 +1,46 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+#Window:Pos=BottomCenter
+; You can also specify window position by the coordinate.
+;#Window:X=0
+;#Window:Y=0
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=50
+; Margin
+;#Window:MarginLeft=0
+#Window:MarginTop=0
+;#Window:MarginRight=0
+#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=180
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 25
+	Image1=img\AD_Handle2.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:50, 0 
+
+; Back
+#Control:MenuDock
+	Name=MenuDock
+	Pos=0, 0, 50, 25
+	Image1=img\AD_MaxMode.bmp
+	Image2=img\AD_DownButton.bmp

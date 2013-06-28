@@ -1,0 +1,182 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+#Window:Pos=LeftTop
+; You can also specify window position by the coordinate.
+;#Window:X=0
+;#Window:Y=0
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+#Window:MarginTop=0
+;#Window:MarginRight=0
+#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 ;----------------- Row 1 -------------------
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 50
+	Image1=img\AD_HSBP.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Back
+#Control:MenuDock
+	Name=MenuDock
+	Pos=50, 0, 50, 50
+	Image1=img\AD_Back.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 2 -------------------
+
+; HSlider - Tab
+#Control:HSlider
+	Name=Tab
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{s Down}{s Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{o Down}{o Up}{Ctrl Up}
+	TouchKey={Tab Down}{Tab Up}
+	Image1=img\AD_Tab.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 3 -------------------
+
+; HSlider - Undo
+#Control:HSlider
+	Name=Undo
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{y Down}{y Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	TouchKey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	Image1=img\AD_Undo.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 4 -------------------
+
+; V
+#Control:Key
+	Name=V
+	Pos=0, 0, 50, 50
+	DownKey={v Down}
+	UpKey={v Up}
+	Image1=img\AD_Ctrl.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Shift
+#Control:Key
+	Name=Shift
+	Pos=50, 0, 50, 50
+	DownKey={Shift Down}
+	UpKey={Shift Up}
+	Image1=img\AD_Shift2.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 5 -------------------
+
+; Full View
+#Control:Key
+	Name=FullView
+	Pos=0, 0, 50, 50
+	DownKey={Ctrl Down}{Alt Down}{0 Down}
+	UpKey={0 Up}{Alt Up}{Ctrl Up}
+	Image1=img\AD_ViewF.bmp
+	Image2=img\AD_DownButton.bmp
+
+; D
+#Control:Key
+	Name=D
+	Pos=50, 0, 50, 50
+	DownKey={d Down}
+	UpKey={d Up}
+	Image1=img\AD_Diagonal.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 6 -------------------
+
+; B
+#Control:Key
+	Name=B
+	Pos=0, 0, 50, 80
+	DownKey={b Down}
+	UpKey={b Up}
+	Image1=img\AD_BrushSize2.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - Paint Slider
+#Control:VSliderDelay
+	Name=PaintSlider
+	Pos=50, 0, 50, 80
+	Step=10
+	Upkey={l Down}{l Up}
+	Downkey={m Down}{m Up}
+	TouchKey={s Down}{s Up}
+	Image1=img\AD_Brush.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 7 -------------------
+
+; Alt
+#Control:Key
+	Name=Alt
+	Pos=0, 0, 100, 100
+	DownKey={Alt Down}
+	UpKey={Alt Up}
+	Image1=img\AD_Picker.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 8 -------------------
+
+; Space key - Control type: Key
+#Control:Key
+	Name=Space
+	Pos=0, 0, 100, 100
+	DownKey={Space Down}
+	UpKey={Space Up}
+	Image1=img\AD_Move100.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 9 ---------------------------------
+
+; VSlider - CopyPasteCut
+#Control:VSliderDelay
+	Name=CopyPasteCut
+	Pos=0, 0, 50, 80
+	Step=10
+	Upkey=^c
+	Downkey=^x
+	TouchKey={Ctrl Down}{v Down}{v Up}{Ctrl Up}
+	Image1=img\AD_Paste.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - Select Tools2
+#Control:VSliderDelay
+	Name=SelectTool2
+	Pos=50, 0, 50, 80
+	Step=10
+	Upkey={Ctrl Down}{a Down}{a Up}{Ctrl Up}
+	Downkey={esc Down}{esc Up}
+	TouchKey={Enter Down}{Enter Up}
+	Image1=img\AD_Enter3.bmp
+	Image2=img\AD_DownButton.bmp

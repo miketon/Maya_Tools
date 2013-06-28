@@ -1,0 +1,172 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+#Window:Pos=CenterCenter
+; You can also specify window position by the coordinate.
+;#Window:X=0
+;#Window:Y=230
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=50
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+;#Window:MarginTop=0
+;#Window:MarginRight=0
+;#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 ;----------------- Row 1 -------------------
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 130, 50
+	Image1=..\img\AD_Handle3.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+; Min Dock
+#Control:AppDock
+	Name=NumPad_A_M
+	Pos=130, 0, 80, 50
+	Image1=..\img\AD_MinDock.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+; Close Button
+#Control:Close
+	Name=Close
+	Pos=210, 0, 50, 50
+	Image1=..\img\AD_Exit.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 2 -------------------
+
+#Control:Key
+	Name=1
+	Pos=0, 0, 70, 70
+	Downkey=1
+	Upkey=
+	Image1=..\img\AD_1.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=2
+	Pos=70, 0, 70, 70
+	Downkey=2
+	Upkey=
+	Image1=..\img\AD_2.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=3
+	Pos=140, 0, 70, 70
+	Downkey=3
+	Upkey=
+	Image1=..\img\AD_3.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=BackSpace
+	Pos=210, 0, 50, 140
+	Downkey={Backspace}
+	Upkey=
+	Image1=..\img\AD_BackSpace2.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 70 ;----------------- ROW 3 -------------------
+
+
+#Control:Key
+	Name=4
+	Pos=0, 0, 70, 70
+	Downkey=4
+	Upkey=
+	Image1=..\img\AD_4.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=5
+	Pos=70, 0, 70, 70
+	Downkey=2
+	Upkey
+	Image1=..\img\AD_5.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=6
+	Pos=140, 0, 70, 70
+	Downkey=6
+	Upkey=
+	Image1=..\img\AD_6.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 70 ;----------------- ROW 4 -------------------
+
+#Control:Key
+	Name=7
+	Pos=0, 0, 70, 70
+	Downkey=7
+	Upkey=
+	Image1=..\img\AD_7.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=8
+	Pos=70, 0, 70, 70
+	Downkey=8
+	Upkey=
+	Image1=..\img\AD_8.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=9
+	Pos=140, 0, 70, 70
+	Downkey=9
+	Upkey=
+	Image1=..\img\AD_9.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=Enter
+	Pos=210, 0, 50, 140
+	Downkey={Enter}
+	Upkey=
+	Image1=..\img\AD_Enter2.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 70 ;----------------- ROW 5 -------------------
+
+#Control:Key
+	Name=0
+	Pos=0, 0, 70, 70
+	Downkey={0}
+	Upkey=
+	Image1=..\img\AD_0.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=Minus
+	Pos=70, 0, 70, 70
+	Downkey=-
+	Upkey=
+	Image1=..\img\AD_Minus.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#Control:Key
+	Name=Period
+	Pos=140, 0, 70, 70
+	Downkey=.
+	Upkey=
+	Image1=..\img\AD_Period.bmp
+	Image2=..\img\AD_DownButton.bmp

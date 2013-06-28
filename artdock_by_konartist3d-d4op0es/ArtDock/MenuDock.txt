@@ -1,0 +1,184 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+#Window:Pos=LeftTop
+; You can also specify window position by the coordinate.
+;#Window:X=0
+;#Window:Y=0
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+#Window:MarginTop=0
+;#Window:MarginRight=0
+#Window:MarginBottom=10
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 ;----------------- Row 1 -------------------
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 50
+	Image1=img\AD_Handle.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Min Dock
+#Control:Dock
+	Name=MinDock
+	Pos=55, 0, 80, 50
+	Image1=img\AD_MinDock.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Close Button
+#Control:Close
+	Name=Close
+	Pos=140, 0, 50, 50
+	Image1=img\AD_Exit.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 2 -------------------
+
+; Menu TouchOn
+#Control:TouchOn
+	Name=TouchON
+	Pos=10, 0, 50, 50
+	Image1=img\AD_TouchON.bmp
+	Image2=img\AD_DownButton.bmp
+
+; NumPad
+#Control:AppDock
+	Name=NumPad_A
+	Pos=70, 0, 50, 50
+	Image1=img\AD_NumPad.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Menu TouchOff
+#Control:TouchOff
+	Name=TouchOffName
+	Pos=130, 0, 50, 50
+	Image1=img\AD_TouchOFF.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 60 ;----------------- ROW 3 -------------------
+
+; Rotate Left
+#Control:Key
+	Name=RotLeft
+	Pos=10, 0, 50, 50
+	Downkey=
+	Upkey={Alt Down}{Ctrl Down}{Left Down}{Left Up}{Ctrl Up}{Alt Up}
+	Image1=img\AD_ScreenLeft.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Rotate Normal
+#Control:Key
+	Name=RotNormal
+	Pos=70, 0, 50, 50
+	Downkey=
+	Upkey={Alt Down}{Ctrl Down}{Up Down}{Up Up}{Ctrl Up}{Alt Up}
+	Image1=img\AD_Screen.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Rotate Right
+#Control:Key
+	Name=RotRight
+	Pos=130, 0, 50, 50
+	Downkey=
+	Upkey={Alt Down}{Ctrl Down}{Right Down}{Right Up}{Ctrl Up}{Alt Up}
+	Image1=img\AD_ScreenRight.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 70 ;----------------- ROW 4 -------------------
+
+; Photoshop Dock
+#Control:DockSlider
+	Name=PhotoShopDock
+	Pos=10, 0, 80, 80
+	Step=50
+	Image1=img\AD_Photoshop.bmp
+	Image2=img\AD_DownButton.bmp
+
+; SketchBook Pro Dock
+#Control:DockSlider
+	Name=SBPDock
+	Pos=100, 0, 80, 80
+	Image1=img\AD_SBP.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 90 ;----------------- ROW 5 -------------------
+
+; Dock Sai
+#Control:DockSlider
+	Name=SaiDock
+	Pos=10, 0, 80, 80
+	Image1=img\AD_Sai.bmp
+	Image2=img\AD_DownButton.bmp
+
+; MyPaint Dock
+#Control:DockSlider
+	Name=MyPaintDock
+	Pos=100, 0, 80, 80
+	Image1=img\AD_MyPaint.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 90 ;----------------- ROW 6 -------------------
+
+; ZBrush Dock
+#Control:Dock
+	Name=ZBrushDock
+	Pos=10, 0, 80, 80
+	Image1=img\AD_ZBrush.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Maya Dock
+#Control:Dock
+	Name=MayaDock
+	Pos=100, 0, 80, 80
+	Image1=img\AD_Maya.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 90 ;----------------- ROW 7 -------------------
+
+; TopoGun Dock
+#Control:Dock
+	Name=TopoGunDock
+	Pos=10, 0, 80, 80
+	Image1=img\AD_TopoGun.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Silo Dock
+#Control:Dock
+	Name=SiloDock
+	Pos=100, 0, 80, 80
+	Image1=img\AD_Silo.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 90 ;----------------- ROW 8 -------------------
+
+; Max Dock
+#Control:Dock
+	Name=3DSMaxDock
+	Pos=10, 0, 80, 80
+	Image1=img\AD_3DSMax.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Generic Dock
+#Control:Dock
+	Name=GenericDock
+	Pos=100, 0, 80, 80
+	Image1=img\AD_Generic.bmp
+	Image2=img\AD_DownButton.bmp

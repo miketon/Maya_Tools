@@ -1,0 +1,114 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+;#Window:Pos=LeftTop
+; You can also specify window position by the coordinate.
+#Window:X=50
+#Window:Y=55
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+;#Window:MarginTop=0
+;#Window:MarginRight=0
+;#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 50
+	Image1=img\AD_HSBP.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Back
+#Control:MenuDock
+	Name=MenuDock
+	Pos=0, 50, 50, 30
+	Image1=img\AD_Back.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:50, 0 
+
+; HSlider - Tab
+#Control:HSlider
+	Name=Tab
+	Pos=0, 0, 100, 80
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{s Down}{s Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{o Down}{o Up}{Ctrl Up}
+	TouchKey={Tab Down}{Tab Up}
+	Image1=img\AD_PTab.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset: 100, 0 
+
+; VSlider - Paint Slider
+#Control:VSliderDelay
+	Name=PaintSlider
+	Pos=0, 0, 80, 80
+	Step=10
+	Upkey={l Down}{l Up}
+	Downkey={m Down}{m Up}
+	TouchKey={s Down}{s Up}
+	Image1=img\AD_PPaint.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset: 80, 0 
+
+; VSlider - Select Tools2
+#Control:VSliderDelay
+	Name=SelectTool2
+	Pos=0, 0, 80, 80
+	Step=10
+	Upkey=^a
+	Downkey={esc}
+	TouchKey={Enter}
+	Image1=img\AD_PEnter2.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset: 80, 0 
+
+; Ctrl
+#Control:ToggleKey
+	Name=Ctrl
+	Pos=0, 0, 80, 80
+	DownKey={v Down}
+	UpKey={v Up}
+	Image1=img\AD_PCtrl.bmp
+	Image2=img\AD_PCtrl_D.bmp
+
+; Shift
+#Control:ToggleKey
+	Name=Shift
+	Pos=80, 0, 80, 80
+	DownKey={Shift Down}
+	UpKey={Shift Up}
+	Image1=img\AD_PShift.bmp
+	Image2=img\AD_PShift_D.bmp
+
+; D
+#Control:ToggleKey
+	Name=D
+	Pos=160, 0, 80, 80
+	DownKey={d Down}
+	UpKey={d Up}
+	Image1=img\AD_PD.bmp
+	Image2=img\AD_PD_D.bmp

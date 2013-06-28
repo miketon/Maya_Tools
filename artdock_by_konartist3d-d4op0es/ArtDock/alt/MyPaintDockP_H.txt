@@ -1,0 +1,104 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+;#Window:Pos=LeftTop
+; You can also specify window position by the coordinate.
+#Window:X=0
+#Window:Y=230
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=50
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+;#Window:MarginTop=0
+;#Window:MarginRight=0
+;#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 65, 35
+	Image1=..\img\AD_Handle.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+
+#ControlOffset:0, 35 
+
+; HSlider - Undo
+#Control:HSlider
+	Name=Undo
+	Pos=0, 0, 65, 80
+	Step=10
+	;Left
+	Upkey={y Down}{y Up}
+	;Right
+	Downkey={z Down}{z Up}
+	TouchKey={z Down}{z Up}
+	Image1=..\img\AD_PUndo.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+
+#ControlOffset:0, 80 
+
+; Alt
+#Control:Key
+	Name=Alt
+	Pos=0, 0, 65, 80
+	DownKey={Alt Down}
+	UpKey={Alt Up}
+	Image1=..\img\AD_PPicker.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 
+
+; Space key - Control type: Key
+#Control:Key
+	Name=Space
+	Pos=0, 0, 65, 80
+	DownKey={Space Down}
+	UpKey={Space Up}
+	Image1=..\img\AD_PHand.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 
+
+; VSlider - Brush Size Slider
+#Control:VSlider
+	Name=BrushSizeSlider
+	Pos=0, 0, 65, 80
+	Step=15
+	Upkey={] Down}{] Up}
+	Downkey={[ Down}{[ Up}
+	TouchKey={RButton}
+	Image1=..\img\AD_PBrushSize.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 
+
+ VSlider - Zoom Slider
+#Control:VSlider
+	Name=ZoomSlider
+	Pos=0, 0, 65, 80
+	Step=20
+	UpKey=.
+	DownKey=,
+	TouchKey={F12 Down}{F12 Up}
+	Image1=..\img\AD_PZoom.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 

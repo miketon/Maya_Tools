@@ -1,0 +1,109 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+;#Window:Pos=LeftTop
+; You can also specify window position by the coordinate.
+#Window:X=0
+#Window:Y=230
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=50
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+;#Window:MarginTop=0
+;#Window:MarginRight=0
+;#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 ;----------------- Row 1 -------------------
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 65, 35
+	Image1=..\img\AD_Handle.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 35 ;----------------- ROW 2 -------------------
+
+; HSlider - Undo
+#Control:HSlider
+	Name=Undo
+	Pos=0, 0, 65, 80
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{y Down}{y Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	TouchKey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	Image1=..\img\AD_PUndo.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 3 -------------------
+
+; Alt
+#Control:Key
+	Name=Alt
+	Pos=0, 0, 65, 80
+	DownKey={Alt Down}
+	UpKey={Alt Up}
+	Image1=..\img\AD_PPicker.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 4 -------------------
+
+; Space key - Control type: Key
+#Control:Key
+	Name=Space
+	Pos=0, 0, 65, 80
+	DownKey={Space Down}
+	UpKey={Space Up}
+	Image1=..\img\AD_PHand.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 5 -------------------
+
+; B
+#Control:Key
+	Name=B
+	Pos=0, 0, 65, 80
+	DownKey={b Down}
+	UpKey={b Up}
+	Image1=..\img\AD_PBrushSize2.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 6 -------------------
+
+; VSlider - CopyPasteCut
+#Control:VSliderDelay
+	Name=CopyPasteCut
+	Pos=0, 0, 65, 80
+	Step=10
+	Upkey=^c
+	Downkey=^x
+	TouchKey={Ctrl Down}{v Down}{v Up}{Ctrl Up}
+	Image1=..\img\AD_PPaste.bmp
+	Image2=..\img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 7 -------------------
+
+; Full View
+#Control:Key
+	Name=FullView
+	Pos=0, 0, 65, 65
+	DownKey={Ctrl Down}{Alt Down}{0 Down}
+	UpKey={0 Up}{Alt Up}{Ctrl Up}
+	Image1=..\img\AD_ViewF.bmp
+	Image2=img\AD_DownButton.bmp

@@ -1,0 +1,198 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+#Window:Pos=RightTop
+; You can also specify window position by the coordinate.
+;#Window:X=0
+;#Window:Y=0
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+#Window:MarginTop=0
+;#Window:MarginRight=0
+#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 ;----------------- Row 1 -------------------
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 50
+	Image1=img\AD_HZBrush.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Back
+#Control:MenuDock
+	Name=MenuDock
+	Pos=50, 0, 50, 50
+	Image1=img\AD_Back.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 2 -------------------
+
+; HSlider - Tab
+#Control:HSlider
+	Name=Tab
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{s Down}{s Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{o Down}{o Up}{Ctrl Up}
+	TouchKey={Tab Down}{Tab Up}
+	Image1=img\AD_Tab.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 3 -------------------
+
+; HSlider - Undo
+#Control:HSlider
+	Name=Undo
+	Pos=0, 0, 100, 50
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{Shift Down}{z Down}{z Up}{Shift Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	TouchKey={Ctrl Down}{z Down}{z Up}{Ctrl Up}
+	Image1=img\AD_Undo.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 50 ;----------------- ROW 4 -------------------
+
+; VSlider - i
+#Control:VSliderDelay
+	Name=i
+	Pos=0, 0, 50, 80
+	Step=10
+	UpKey={Ctrl Down}{1 Down}{1 Up}{Ctrl Up}
+	DownKey={Ctrl Down}{3 Down}{3 Up}{Ctrl Up}
+	TouchKey={i Down}{i Up}
+	Image1=img\AD_CustomBrush.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - b
+#Control:VSliderDelay
+	Name=b
+	Pos=50, 0, 50, 80
+	Step=10
+	UpKey={Ctrl Down}{2 Down}{2 Up}{Ctrl Up}
+	DownKey={Ctrl Down}{4 Down}{4 Up}{Ctrl Up}
+	TouchKey={b Down}{b Up}
+	Image1=img\AD_BrushMenu.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 80 ;----------------- ROW 5 -------------------
+
+; Ctrl
+#Control:Key
+	Name=Ctrl
+	Pos=0, 0, 65, 85
+	DownKey={Ctrl Down}
+	UpKey={Ctrl Up}
+	Image1=img\AD_CtrlZB.bmp
+	Image2=img\AD_DownButton.bmp
+
+; CtrlAlt
+#Control:Key
+	Name=CtrAlt
+	Pos=65, 0, 35, 85
+	DownKey={Alt Down}{Ctrl Down}
+	UpKey={Ctrl Up}{Alt Up}
+	Image1=img\AD_CA.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 85 ;----------------- ROW 6 -------------------
+
+; Shift
+#Control:Key
+	Name=Shift
+	Pos=0, 0, 65, 85
+	DownKey={Shift Down}
+	UpKey={Shift Up}
+	Image1=img\AD_ShiftZB.bmp
+	Image2=img\AD_DownButton.bmp
+
+; ShiftCtrl
+#Control:Key
+	Name=ShiftCtrl
+	Pos=65, 0, 35, 85
+	DownKey={Shift Down}{Ctrl Down}
+	UpKey={Ctrl Up}{Shift Up}
+	Image1=img\AD_SC.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 85 ;----------------- ROW 7 -------------------
+
+; Alt
+#Control:Key
+	Name=Alt
+	Pos=0, 0, 100, 100
+	DownKey={Alt Down}
+	UpKey={Alt Up}
+	Image1=img\AD_Alt.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 8 -------------------
+
+; Space key - Control type: Key
+#Control:Key
+	Name=Space
+	Pos=0, 0, 100, 100
+	DownKey={Space Down}
+	UpKey={Space Up}
+	Image1=img\AD_BrushPal.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:0, 100 ;----------------- ROW 9 -------------------
+
+; VSlider - LightBox
+#Control:VSliderDelay
+	Name=LightBox
+	Pos=0, 0, 50, 80
+	Step=10
+	UpKey={f Down}{f Up}
+	DownKey={Ctrl Down}{n Down}{n Up}{Ctrl Up}
+	TouchKey={, Down}{, Up}
+	Image1=img\AD_LightBox.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - SubTools
+#Control:VSliderDelay
+	Name=SubTools
+	Pos=50, 0, 50, 80
+	Step=10
+	UpKey={d Down}{d Up}
+	DownKey={Shift Down}{d Down}{d Up}{Shift Up}
+	TouchKey={n Down}{n Up}
+	Image1=img\AD_SubT.bmp
+	Image2=img\AD_DownButton.bmp
+
+
+#ControlOffset:0, 80 ;----------------- ROW 10 -------------------
+
+; VSlider - Subdivide
+#Control:VSliderDelay
+	Name=Subdivide
+	Pos=0, 0, 100, 40
+	Step=10
+	UpKey={Ctrl Down}{d Down}{d Up}{Ctrl Up}
+	DownKey=
+	TouchKey=
+	Image1=img\AD_Subdivide.bmp
+	Image2=img\AD_DownButton.bmp

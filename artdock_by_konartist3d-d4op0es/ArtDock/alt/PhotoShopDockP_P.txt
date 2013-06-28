@@ -1,0 +1,130 @@
+﻿;############################### Window Settings ##############################
+
+; Background color of window.
+#Window:Color=Black
+; Default font color.
+#Window:FontColor=9B9B9B
+; Font color when button is pressed.
+#Window:ActiveFontColor=00C0FF
+
+; Specify Start-up window position by Left/Right/Top/Bottom. (alone or in combination)
+;#Window:Pos=LeftTop
+; You can also specify window position by the coordinate.
+#Window:X=50
+#Window:Y=90
+
+; Window size (If not specified, window size will be set automatically.)
+;#Window:Width=125
+;#Window:Height=550
+; Margin
+;#Window:MarginLeft=0
+;#Window:MarginTop=0
+;#Window:MarginRight=0
+;#Window:MarginBottom=0
+
+; Window transparency: Full transparent 0 ~ 255 Opaque
+#Window:Transparent=255
+
+;############################## Controls settings #############################
+
+#ControlOffset:0, 0 
+
+; Handle for moving the window. - Control-type: Handle
+#Control:Handle
+	Name=Handle
+	Pos=0, 0, 50, 50
+	Image1=img\AD_HPhotoshop.bmp
+	Image2=img\AD_DownButton.bmp
+
+; Back
+#Control:MenuDock
+	Name=MenuDock
+	Pos=0, 50, 50, 30
+	Image1=img\AD_Back.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset:50, 0 
+
+; HSlider - Tab
+#Control:HSlider
+	Name=Tab
+	Pos=0, 0, 100, 80
+	Step=10
+	;Left
+	Upkey={Ctrl Down}{s Down}{s Up}{Ctrl Up}
+	;Right
+	Downkey={Ctrl Down}{o Down}{o Up}{Ctrl Up}
+	TouchKey={Tab Down}{Tab Up}
+	Image1=img\AD_PTab.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset: 100, 0 
+
+; VSlider - Opacity
+#Control:VSliderDelay
+	Name=OpacSlider
+	Pos=0, 0, 80, 80
+	Step=15
+	Upkey={0 Down}{0 Up}
+	Downkey=3
+	TouchKey=7
+	Image1=img\AD_POpacity.bmp
+	Image2=img\AD_DownButton.bmp
+
+
+#ControlOffset: 80, 0 
+
+; VSlider - Paint Slider
+#Control:VSliderDelay
+	Name=PaintSlider
+	Pos=0, 0, 80, 80
+	Step=10
+	Upkey={x Down}{x Up}
+	Downkey={i Down}{i Up}
+	TouchKey={b Down}{b Up}
+	Image1=img\AD_PBrush.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset: 80, 0 
+
+; VSlider - Select Tools
+#Control:VSliderDelay
+	Name=SelectTool
+	Pos=0, 0, 80, 80
+	Step=10
+	Upkey=l
+	Downkey=w
+	TouchKey=m
+	Image1=img\AD_PSelect.bmp
+	Image2=img\AD_DownButton.bmp
+
+; VSlider - Select Tools2
+#Control:VSliderDelay
+	Name=SelectTool2
+	Pos=80, 0, 80, 80
+	Step=10
+	Upkey=^a
+	Downkey=^d
+	TouchKey=^t
+	Image1=img\AD_PSelectTrans.bmp
+	Image2=img\AD_DownButton.bmp
+
+#ControlOffset: 160, 0
+
+; Ctrl
+#Control:ToggleKey
+	Name=Ctrl
+	Pos=0, 0, 80, 80
+	DownKey={Ctrl Down}
+	UpKey={Ctrl Up}
+	Image1=img\AD_PCtrl.bmp
+	Image2=img\AD_PCtrl_D.bmp
+
+; Shift
+#Control:ToggleKey
+	Name=Shift
+	Pos=80, 0, 80, 80
+	DownKey={Shift Down}
+	UpKey={Shift Up}
+	Image1=img\AD_PShift.bmp
+	Image2=img\AD_PShift_D.bmp

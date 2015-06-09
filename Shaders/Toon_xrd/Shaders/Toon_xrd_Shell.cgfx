@@ -1,0 +1,195 @@
+
+///////////////////////////////////////////////////////////////////////////////////////
+//  lcBasicShaderComponents.cgfx
+//
+//  Version: 1.0
+//
+//  Author: Leonardo Covarrubias
+//  Date: 03/07/2010
+//  Contact: leo.covarrubias@live.com
+//  Website: blog.leocov.com - www.leocov.com
+//
+//
+//  Special thanks for inspiration and learing:
+//
+//  Ben Cloward - http://www.bencloward.com
+//  Brice Vandemoortele - http://www.mentalwarp.com
+//  'The Renderman Sading Language Guide' - Rudy Cortes - www.rslprogramming.com - many basic and shading functions
+//
+//  This work is licensed under a  Creative Commons Attribution-Share Alike 3.0 Unported License
+//  http://creativecommons.org/licenses/by-sa/3.0/
+//
+//  Change List:
+//
+//  1.0 - initial release
+//  1.1 - Extending stub to do shell offset -Mike Ton
+//
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+// Toon_xrd_Shell.cgfx 
+//
+// Version 1.0
+//
+// Author: Mike Ton 
+// Date  : 06/09/2015
+// 1.1 - Initial implementation.  Inspired by Guilty Gear Xrd GDC presentation.  Extending Leonardo's component stubs. 
+//
+///////////////////////////////////////////////////////////////////////////////////////
+
+string description = "Toon_xrd_Shell"; 
+
+////////////////////////////////////////
+////// User Tweakables /////////////////
+////////////////////////////////////////
+
+float3 lineColor : COLOR
+<
+  string UIName   = "Line Color";
+  string UIWidget = "Color";
+  string type     = "color";
+> = {0.0, 0.0, 0.0};
+
+bool bVertexToonMask
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Use Vertex Color to Mask Toon Shade?";
+> = false;
+
+float fShell_Outline 
+<
+  string uiwidget = "slider";
+  float uimin     = 0.0;
+  float uimax     = 0.1;
+  float uistep    = 0.001;
+  string uiname   = "fShell_Outline";
+> = 0.01;
+
+float fShell_Outline_Pow 
+<
+  string uiwidget = "slider";
+  float uimin     =  0.0;
+  float uimax     = 10.0;
+  float uistep    =  1.0;
+  string uiname   = "fShell_Outline_Pow";
+> = 1.0;
+
+////////////////////////////////////////
+////// Lights - position and color /////
+////////////////////////////////////////
+
+////////////////////////////////////////
+////// Auto Maxtricies /////////////////
+////////////////////////////////////////
+
+float4x4 ObjectToNdc           : WorldViewProjection       < string UIWidget = "None"; >;
+float4x4 WorldInverseTranspose : WorldInverseTranspose     < string UIWidget = "None"; >;
+float4x4 CameraToWorld         : ViewInverse               < string UIWidget = "None"; >;
+float4x4 WorldToCamera         : View                      < string UIWidget = "None"; >;
+float4x4 ObjectToCamera        : WorldView                 < string UIWidget = "None"; >;
+float4x4 ObjectToWorld         : World                     < string UIWidget = "None"; >;
+
+////////////////////////////////////////
+////// Structs /////////////////////////
+////////////////////////////////////////
+
+// input from application
+struct app2vert {
+    float4 Position : POSITION;
+    float2 TexCoord : TEXCOORD0;
+    float4 Normal   : NORMAL;
+	  float4 vertcol		: COLOR0; 
+};
+
+
+// output to fragment program
+struct vert2pixel {
+    float4 position      : POSITION;
+    float2 UV            : TEXCOORD0;
+    float3 worldNormal   : TEXCOORD1;
+    float3 eyeVec        : TEXCOORD4;
+	  float4 vertcol         : COLOR0; 
+
+};
+
+////////////////////////////////////////
+////// Vertex Shader ///////////////////
+////////////////////////////////////////
+
+vert2pixel VS_ToonShell(app2vert IN)
+{
+  vert2pixel OUT;
+
+  OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1));
+
+  OUT.worldNormal   = mul(WorldInverseTranspose, IN.Normal).xyz;
+  OUT.worldNormal.x *= ObjectToNdc[0][0];
+  OUT.worldNormal.y *= ObjectToNdc[1][1];
+
+	OUT.vertcol = IN.vertcol; //passing through vertex color
+  OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1));
+
+  if(bVertexToonMask){
+    OUT.position.xy += OUT.worldNormal.xy * OUT.position.z * fShell_Outline * pow(1.0-IN.vertcol.r, fShell_Outline_Pow); 
+  }
+  else{
+    OUT.position.xy += OUT.worldNormal.xy * OUT.position.z * fShell_Outline; 
+  }
+  
+  return OUT;
+}
+
+////////////////////////////////////////
+////// Pixel Shaders ///////////////////
+////////////////////////////////////////
+
+float4 PSVertColors(vert2pixel IN) : COLOR
+{
+  return IN.vertcol;
+}
+
+float4 PS_ShellColor(vert2pixel IN) : COLOR
+{
+  //return float4(1.0, 0.0, 0.0, 1.0);
+  return float4(lineColor, 1.0);
+}
+
+////////////////////////////////////////
+////// Techniques //////////////////////
+////////////////////////////////////////
+
+technique MTON_VERTCOLOR
+{
+  pass P0
+  {
+    CullFaceEnable=false;
+    CullFace = Back; //get rid of front face
+    //CullMode = Back; //get rid of fronts
+    DepthTestEnable=true;
+    DepthMask = true;
+    DepthFunc = LEqual;
+
+    VertexProgram   = compile vp40 VS_ToonShell();
+    FragmentProgram = compile fp40 PSVertColors();
+
+  }
+}
+
+technique MTON_SHELL
+{
+  pass P0
+  {
+    CullFaceEnable=false;
+    CullFace = Front; //get rid of front face
+    //CullMode = Front; //get rid of fronts
+    DepthTestEnable=true;
+    DepthMask = true;
+    DepthFunc = LEqual;
+
+    VertexProgram   = compile vp40 VS_ToonShell();
+    FragmentProgram = compile fp40 PS_ShellColor();
+
+  }
+}
+
+

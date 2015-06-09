@@ -1,0 +1,348 @@
+
+///////////////////////////////////////////////////////////////////////////////////////
+//  lcBasicShaderComponents.cgfx
+//
+//  Version: 1.0
+//
+//  Author: Leonardo Covarrubias
+//  Date: 03/07/2010
+//  Contact: leo.covarrubias@live.com
+//  Website: blog.leocov.com - www.leocov.com
+//
+//
+//  Special thanks for inspiration and learing:
+//
+//  Ben Cloward - http://www.bencloward.com
+//  Brice Vandemoortele - http://www.mentalwarp.com
+//  'The Renderman Sading Language Guide' - Rudy Cortes - www.rslprogramming.com - many basic and shading functions
+//
+//  This work is licensed under a  Creative Commons Attribution-Share Alike 3.0 Unported License
+//  http://creativecommons.org/licenses/by-sa/3.0/
+//
+//  Change List:
+//
+//  1.0 - initial release
+//
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+// Toon_xrd.cgfx 
+//
+// Version 1.0
+//
+// Author: Mike Ton 
+// Date  : 06/09/2015
+// 1.1 - Initial implementation.  Inspired by Guilty Gear Xrd GDC presentation.  Extending Leonardo's component stubs. 
+//
+///////////////////////////////////////////////////////////////////////////////////////
+
+string description = "Toon_xrd"; 
+
+////////////////////////////////////////
+////// User Tweakables /////////////////
+////////////////////////////////////////
+
+
+////////////////////////////////////////
+////// Lights - position and color /////
+////////////////////////////////////////
+
+float4 light1Dir : DIRECTION
+<
+  string UIName = "Light 1 - Directional Light";
+  string Object = "DirectionalLight";
+  string Space  = "World";
+  int refID     = 0;
+> = {-45.0, 0.0, 0.0, 0.0};
+
+////////////////////////////////////////
+////// Auto Maxtricies /////////////////
+////////////////////////////////////////
+
+float4x4 ObjectToNdc           : WorldViewProjection       < string UIWidget = "None"; >;
+float4x4 WorldInverseTranspose : WorldInverseTranspose     < string UIWidget = "None"; >;
+float4x4 CameraToWorld         : ViewInverse               < string UIWidget = "None"; >;
+float4x4 WorldToCamera         : View                      < string UIWidget = "None"; >;
+float4x4 ObjectToCamera        : WorldView                 < string UIWidget = "None"; >;
+float4x4 ObjectToWorld         : World                     < string UIWidget = "None"; >;
+
+////////////////////////////////////////
+////// Structs /////////////////////////
+////////////////////////////////////////
+
+// input from application
+struct app2vert {
+    float4 Position : POSITION;
+    float2 TexCoord : TEXCOORD0;
+    float4 Normal   : NORMAL;
+    float4 Binormal : BINORMAL0;
+    float4 Tangent  : TANGENT0;
+	  float4 vertcol		: COLOR0; 
+};
+
+
+// output to fragment program
+struct vert2pixel {
+    float4 position      : POSITION;
+    float2 UV            : TEXCOORD0;
+    float3 worldNormal   : TEXCOORD1;
+    float3 worldBinormal : TEXCOORD2;
+    float3 worldTangent  : TEXCOORD3;
+    float3 eyeVec        : TEXCOORD4;
+    float3 light1Vec     : TEXCOORD5;
+	  float4 vertcol         : COLOR0; 
+
+};
+
+////////////////////////////////////////
+////// Vertex Shader ///////////////////
+////////////////////////////////////////
+
+vert2pixel VS(app2vert IN)
+{
+  vert2pixel OUT;
+
+  OUT.worldNormal   = mul(WorldInverseTranspose, IN.Normal).xyz;
+  OUT.worldTangent  = mul(WorldInverseTranspose, IN.Tangent).xyz;
+  OUT.worldBinormal = mul(WorldInverseTranspose, IN.Binormal).xyz;
+
+  OUT.eyeVec =  WorldToCamera[2].xyz;
+
+  OUT.UV = IN.TexCoord.xy;
+  OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1));
+
+  //light vector for directional lights (free!)
+  OUT.light1Vec = -light1Dir.xyz;
+	OUT.vertcol = IN.vertcol; //passing through vertex color
+
+  return OUT;
+}
+//////////////////////////////////////////////////
+////// Compartmentalized Shading Components //////
+//////////////////////////////////////////////////
+
+////////////////////////////////////////
+// Tangent Space Normal Mapping
+float3 normalsTangent (float4 normalTexture,
+                       float3 Nn,
+                       float3 Bn,
+                       float3 Tn,
+                       float3 V)
+{
+  if(flipGreen)normalTexture.g = 1-normalTexture.g;
+
+  if(backFaceLighting == true) Nn = faceforward(Nn,-V,Nn);
+  if(useNormalTexture)
+  {
+    normalTexture.rgb = normalTexture.rgb * 2 - 1;
+    normalTexture.xy *= normalIntensity;
+
+    if (normalIntensity > 0) Nn = normalize((normalTexture.x*Tn)+(normalTexture.y*Bn)+(normalTexture.z*Nn));
+  }
+
+  return Nn;
+}
+
+////////////////////////////////////////
+////// Pixel Shaders ///////////////////
+////////////////////////////////////////
+
+////////////////////////////////////////
+////// Techniques //////////////////////
+////////////////////////////////////////
+
+
+float4 PSVertColors(vert2pixel IN) : COLOR
+{
+  return IN.vertcol;
+}
+
+technique MTON_VERTCOLOR
+{
+  pass P0
+  {
+    CullFaceEnable=false;
+    DepthTestEnable=true;
+    DepthMask = true;
+    DepthFunc = LEqual;
+
+    VertexProgram   = compile vp40 VS();
+    FragmentProgram = compile fp40 PSVertColors();
+
+  }
+}
+
+texture toonRampMap
+<
+  string ResourceName = "";
+  string ResourceType = "2D";
+  string UIName       = "Lit Sphere Map";
+>;
+
+sampler2D toonRampMapSampler = sampler_state
+{
+  Texture   = <toonRampMap>;
+  //MinFilter = LinearMipMapLinear;
+  MinFilter = Point;
+  //MagFilter = Linear;
+  MagFilter = Point;
+  WrapS     = ClampToEdge;
+  WrapT     = Wrap;
+};
+
+
+////////////////////////////////////////
+// Toon Shading using a horizontal 1D Texture, unlit on left, lit on right
+float3 toon1D (float3 N,
+               float3 L, float vMask)
+{
+  float2 UVt = float2( (dot(N,L)*0.5+0.5), 0);
+  //if(useHalfLambert) UVt = float2( pow(dot(N,L)*0.5+.5,2), 0);
+  //float2 UVt = float2( pow(dot(N,L)*0.5+.5,2), 0);
+
+  return tex2D(toonRampMapSampler, UVt * vMask).rgb; //sample the 1D texture with an N.L calculation
+}
+
+//Toon Vertex Masking - default(false) => Not using vertex color to mask toon Shading
+bool bVertexToonMask
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Use Vertex Color to Mask Toon Shade?";
+> = false;
+
+
+texture DiffuseMap
+<
+  string ResourceName = "";
+  string ResourceType = "2D";
+  string UIName       = "Diffuse Map";
+>;
+
+sampler2D DiffuseMapSampler = sampler_state
+{
+  Texture       = <DiffuseMap>;
+  MinFilter = Point;
+  MagFilter = Point;
+  WrapS         = Wrap;
+  WrapT         = Wrap;
+  MaxAnisotropy = 16;
+  LODBias       = -0.5;
+};
+
+//Toon Inner Line- default(false) => Not using vertex color to mask toon Shading
+bool bDiffuseTexture
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Use Diffuse Texture?";
+> = false;
+
+bool bEyeNORM_RimLine //darken line at rim from eyeVec 
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Enable bEyeNORM_RimLine";
+> = false;
+
+float3 lineColor : COLOR
+<
+  string UIName   = "Line Color";
+  string UIWidget = "Color";
+  string type     = "color";
+> = {0.0, 0.0, 0.0};
+
+float lineThreshold
+<
+  string uiwidget = "slider";
+  float uimin     = 0.001;
+  float uimax     = 0.400;
+  float uistep    = 0.001;
+  string uiname   = "line threshold";
+> = 0.15;
+
+float lineThresholdOffSet
+<
+  string uiwidget = "slider";
+  float uimin     = 0.001;
+  float uimax     = 0.400;
+  float uistep    = 0.001;
+  string uiname   = "line threshold += Offset";
+> = 0.15;
+
+
+float linePow 
+<
+  string uiwidget = "slider";
+  float uimin     = -1.0;
+  float uimax     = 100.0;
+  float uistep    = 0.1;
+  string uiname   = "linePow MTON";
+> = 1.0;
+
+float toonOutline(float3 N, float3 V, float IN_vMASK)
+{
+  float edge = dot(N, V);
+  edge = clamp(pow(edge, linePow), 0, 1);
+  if(bVertexToonMask){
+    edge = (edge + lineThresholdOffSet) * IN_vMASK; 
+  }
+
+  if(edge < lineThreshold){
+    return edge;
+  }
+  else{
+    return 1.0;
+  }
+}
+
+
+float4 PSMTON_TOON (vert2pixel IN) : COLOR
+{
+  float2 UV = IN.UV; //*tileTextures;
+
+  float3 N = IN.worldNormal; // * IN.vertcol.r;
+
+  ///////////////////////////////
+  // Toon Diffuse Component    //
+  float3 Tc = 1.0;
+  if(bVertexToonMask){
+    Tc = toon1D(N, (-light1Dir).xyz, IN.vertcol.r);
+  }
+  else{
+    Tc = toon1D(N, (-light1Dir).xyz, 1.0);
+  }
+
+  if(bEyeNORM_RimLine){
+    Tc *= toonOutline(N, IN.eyeVec, IN.vertcol.r); //b&w lines
+    //Tc = mix(lineColor, Tc, edge); //color lines
+  }
+
+  //float3 Tc = saturate(dot(N, L));
+
+  ////////////////////////////////
+  // InnderLine Texture Component  //
+  float Dt = 1.0;
+  if(bDiffuseTexture){
+   Dt = tex2D(DiffuseMapSampler, UV).r;
+  }
+
+  return float4(Tc * Dt, 1.0);
+
+}
+
+
+technique MTON_TOON
+{
+  pass P0
+  {
+    CullFaceEnable=false;
+    DepthTestEnable=true;
+    DepthMask = true;
+    DepthFunc = LEqual;
+
+    VertexProgram   = compile vp40 VS();
+    FragmentProgram = compile fp40 PSMTON_TOON();
+
+  }
+}
+
+
+

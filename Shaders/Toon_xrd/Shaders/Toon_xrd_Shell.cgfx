@@ -32,8 +32,9 @@
 // Version 1.0
 //
 // Author: Mike Ton 
+// Email : mike.ton@gmail(replace with dot char)com
 // Date  : 06/09/2015
-// 1.1 - Initial implementation.  Inspired by Guilty Gear Xrd GDC presentation.  Extending Leonardo's component stubs. 
+// 1.1 - Initial implementation.  Inspired by Junya C Motomura's Guilty Gear Xrd GDC presentation.  Extending Leonardo's component stubs. 
 //
 ///////////////////////////////////////////////////////////////////////////////////////
 

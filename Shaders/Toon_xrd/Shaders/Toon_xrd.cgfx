@@ -32,7 +32,14 @@
 //
 // Author: Mike Ton 
 // Date  : 06/09/2015
-// 1.1 - Initial implementation.  Inspired by Guilty Gear Xrd GDC presentation.  Extending Leonardo's component stubs. 
+// Email : mike.ton@gmail(replace with dot char)com
+// 1.1 - Initial implementation.  Inspired by Team Red Junya C Motomura's Guilty Gear Xrd GDC presentation.  
+//       Notable differences :
+//         * Team Red appears to be straight up using a dot product.  This shader uses a dot product to do 
+//           a uv lookup on a 1D ramp texture.  Affords more flexibility with changing light-to-shadow palette 
+//           via texture edit.
+//         * Team Red actually altered the normals, I'm using vertex color (red channel) to alter the uv lookup
+//       Extending Leonardo's component stubs. 
 //
 ///////////////////////////////////////////////////////////////////////////////////////
 

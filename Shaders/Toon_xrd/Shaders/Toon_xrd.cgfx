@@ -74,6 +74,13 @@ sampler2D toonRampMapSampler = sampler_state
   WrapT     = Wrap;
 };
 
+// Disable/Enable innerLine texture. For Debugging; Can be optimized away.
+bool bDiffuseTexture
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Use Diffuse Texture?";
+> = false;
+
 texture DiffuseMap
 <
   string ResourceName = "";
@@ -84,20 +91,38 @@ texture DiffuseMap
 sampler2D DiffuseMapSampler = sampler_state
 {
   Texture       = <DiffuseMap>;
-  MinFilter = Point;
-  MagFilter = Point;
+  MinFilter = Point; // Set to Point for sharper edges
+  MagFilter = Point; // Set to Point for sharper edges
   WrapS         = Wrap;
   WrapT         = Wrap;
   MaxAnisotropy = 16;
   LODBias       = -0.5;
 };
 
-//Toon Inner Line- default(false) => Not using vertex color to mask toon Shading
-bool bDiffuseTexture
+// Disable/Enable TopologyMask Texture; If false, use vertex color.  Default = false.  Can be optimized away.
+bool bTopologyMaskMap
 <
   string UIWidget = "RadioButton";
-  string UIName   = "Use Diffuse Texture?";
+  string UIName   = "Use Topology Texture? False = Use VertexColor";
 > = false;
+
+texture TopologyMaskMap
+<
+  string ResourceName = "";
+  string ResourceType = "2D";
+  string UIName       = "Topology Map";
+>;
+
+sampler2D TopologyMaskMapSampler = sampler_state
+{
+  Texture       = <TopologyMaskMap>;
+  MinFilter = LinearMipMapLinear;
+  MagFilter = Linear;
+  WrapS         = Wrap;
+  WrapT         = Wrap;
+  MaxAnisotropy = 16;
+  LODBias       = -0.5;
+};
 
 ////////////////////////////////////////
 ////// Lights - position and color /////
@@ -289,18 +314,26 @@ float4 PSMTON_TOON (vert2pixel IN) : COLOR
   // Toon Diffuse Component    //
   float3 Tc = 1.0;
   if(bVertexToonMask){
-    Tc = toon1D(N, (-light1Dir).xyz, IN.vertcol.r);
+    if(bTopologyMaskMap){
+      float normalMask = tex2D(TopologyMaskMapSampler, IN.UV).r;
+      Tc = toon1D(N, (-light1Dir).xyz, normalMask);
+      if(bEyeNORM_RimLine){
+        Tc *= toonOutline(N, IN.eyeVec, normalMask); //color Multiply lines
+        //Tc = mix(lineColor, Tc, edge); //color lines
+      }
+    }
+    else{
+      Tc = toon1D(N, (-light1Dir).xyz, IN.vertcol.r);
+      if(bEyeNORM_RimLine){
+        Tc *= toonOutline(N, IN.eyeVec, IN.vertcol.r); //color Multiply lines
+        //Tc = mix(lineColor, Tc, edge); //color lines
+      }
+    }
   }
   else{
     Tc = toon1D(N, (-light1Dir).xyz, 1.0);
   }
 
-  if(bEyeNORM_RimLine){
-    Tc *= toonOutline(N, IN.eyeVec, IN.vertcol.r); //b&w lines
-    //Tc = mix(lineColor, Tc, edge); //color lines
-  }
-
-  //float3 Tc = saturate(dot(N, L));
 
   ////////////////////////////////
   // InnderLine Texture Component  //

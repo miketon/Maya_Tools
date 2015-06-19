@@ -49,6 +49,80 @@ string description = "Toon_xrd";
 ////// User Tweakables /////////////////
 ////////////////////////////////////////
 
+//Toon Vertex Masking - default(false) => Not using vertex color to mask toon Shading
+bool bVertexToonMask
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Use Vertex Color to Mask Toon Shade?";
+> = false;
+
+texture toonRampMap
+<
+  string ResourceName = "";
+  string ResourceType = "2D";
+  string UIName       = "Lit Sphere Map";
+>;
+
+sampler2D toonRampMapSampler = sampler_state
+{
+  Texture   = <toonRampMap>;
+  //MinFilter = LinearMipMapLinear;
+  MinFilter = Point;
+  //MagFilter = Linear;
+  MagFilter = Point;
+  WrapS     = ClampToEdge;
+  WrapT     = Wrap;
+};
+
+// Disable/Enable innerLine texture. For Debugging; Can be optimized away.
+bool bDiffuseTexture
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Use Diffuse Texture?";
+> = false;
+
+texture DiffuseMap
+<
+  string ResourceName = "";
+  string ResourceType = "2D";
+  string UIName       = "Diffuse Map";
+>;
+
+sampler2D DiffuseMapSampler = sampler_state
+{
+  Texture       = <DiffuseMap>;
+  MinFilter = Point; // Set to Point for sharper edges
+  MagFilter = Point; // Set to Point for sharper edges
+  WrapS         = Wrap;
+  WrapT         = Wrap;
+  MaxAnisotropy = 16;
+  LODBias       = -0.5;
+};
+
+// Disable/Enable TopologyMask Texture; If false, use vertex color.  Default = false.  Can be optimized away.
+bool bTopologyMaskMap
+<
+  string UIWidget = "RadioButton";
+  string UIName   = "Use Topology Texture? False = Use VertexColor";
+> = false;
+
+texture TopologyMaskMap
+<
+  string ResourceName = "";
+  string ResourceType = "2D";
+  string UIName       = "Topology Map";
+>;
+
+sampler2D TopologyMaskMapSampler = sampler_state
+{
+  Texture       = <TopologyMaskMap>;
+  MinFilter = LinearMipMapLinear;
+  MagFilter = Linear;
+  WrapS         = Wrap;
+  WrapT         = Wrap;
+  MaxAnisotropy = 16;
+  LODBias       = -0.5;
+};
 
 ////////////////////////////////////////
 ////// Lights - position and color /////
@@ -79,25 +153,27 @@ float4x4 ObjectToWorld         : World                     < string UIWidget = "
 
 // input from application
 struct app2vert {
-    float4 Position : POSITION;
-    float2 TexCoord : TEXCOORD0;
-    float4 Normal   : NORMAL;
-    float4 Binormal : BINORMAL0;
-    float4 Tangent  : TANGENT0;
-	  float4 vertcol		: COLOR0; 
+    float4 Position  : POSITION ;
+    float2 TexCoord0 : TEXCOORD0;
+    float2 TexCoord1 : TEXCOORD1;
+    float4 Normal    : NORMAL   ;
+    float4 Binormal  : BINORMAL0;
+    float4 Tangent   : TANGENT0 ;
+	  float4 vertcol	 : COLOR0   ; 
 };
 
 
 // output to fragment program
 struct vert2pixel {
-    float4 position      : POSITION;
+    float4 position      : POSITION ;
     float2 UV            : TEXCOORD0;
     float3 worldNormal   : TEXCOORD1;
     float3 worldBinormal : TEXCOORD2;
     float3 worldTangent  : TEXCOORD3;
     float3 eyeVec        : TEXCOORD4;
     float3 light1Vec     : TEXCOORD5;
-	  float4 vertcol         : COLOR0; 
+    float2 UV2           : TEXCOORD6; //2nd UV for Inner Line
+	  float4 vertcol       : COLOR0   ; 
 
 };
 
@@ -115,7 +191,8 @@ vert2pixel VS(app2vert IN)
 
   OUT.eyeVec =  WorldToCamera[2].xyz;
 
-  OUT.UV = IN.TexCoord.xy;
+  OUT.UV  = IN.TexCoord0.xy;
+  OUT.UV2 = IN.TexCoord1.xy;
   OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1));
 
   //light vector for directional lights (free!)
@@ -151,97 +228,7 @@ float3 normalsTangent (float4 normalTexture,
 }
 
 ////////////////////////////////////////
-////// Pixel Shaders ///////////////////
-////////////////////////////////////////
-
-////////////////////////////////////////
-////// Techniques //////////////////////
-////////////////////////////////////////
-
-
-float4 PSVertColors(vert2pixel IN) : COLOR
-{
-  return IN.vertcol;
-}
-
-technique MTON_VERTCOLOR
-{
-  pass P0
-  {
-    CullFaceEnable=false;
-    DepthTestEnable=true;
-    DepthMask = true;
-    DepthFunc = LEqual;
-
-    VertexProgram   = compile vp40 VS();
-    FragmentProgram = compile fp40 PSVertColors();
-
-  }
-}
-
-texture toonRampMap
-<
-  string ResourceName = "";
-  string ResourceType = "2D";
-  string UIName       = "Lit Sphere Map";
->;
-
-sampler2D toonRampMapSampler = sampler_state
-{
-  Texture   = <toonRampMap>;
-  //MinFilter = LinearMipMapLinear;
-  MinFilter = Point;
-  //MagFilter = Linear;
-  MagFilter = Point;
-  WrapS     = ClampToEdge;
-  WrapT     = Wrap;
-};
-
-
-////////////////////////////////////////
-// Toon Shading using a horizontal 1D Texture, unlit on left, lit on right
-float3 toon1D (float3 N,
-               float3 L, float vMask)
-{
-  float2 UVt = float2( (dot(N,L)*0.5+0.5), 0);
-  //if(useHalfLambert) UVt = float2( pow(dot(N,L)*0.5+.5,2), 0);
-  //float2 UVt = float2( pow(dot(N,L)*0.5+.5,2), 0);
-
-  return tex2D(toonRampMapSampler, UVt * vMask).rgb; //sample the 1D texture with an N.L calculation
-}
-
-//Toon Vertex Masking - default(false) => Not using vertex color to mask toon Shading
-bool bVertexToonMask
-<
-  string UIWidget = "RadioButton";
-  string UIName   = "Use Vertex Color to Mask Toon Shade?";
-> = false;
-
-
-texture DiffuseMap
-<
-  string ResourceName = "";
-  string ResourceType = "2D";
-  string UIName       = "Diffuse Map";
->;
-
-sampler2D DiffuseMapSampler = sampler_state
-{
-  Texture       = <DiffuseMap>;
-  MinFilter = Point;
-  MagFilter = Point;
-  WrapS         = Wrap;
-  WrapT         = Wrap;
-  MaxAnisotropy = 16;
-  LODBias       = -0.5;
-};
-
-//Toon Inner Line- default(false) => Not using vertex color to mask toon Shading
-bool bDiffuseTexture
-<
-  string UIWidget = "RadioButton";
-  string UIName   = "Use Diffuse Texture?";
-> = false;
+// Toon Outline based on Rim threshold
 
 bool bEyeNORM_RimLine //darken line at rim from eyeVec 
 <
@@ -300,6 +287,25 @@ float toonOutline(float3 N, float3 V, float IN_vMASK)
   }
 }
 
+////////////////////////////////////////
+////// Pixel Shaders ///////////////////
+////////////////////////////////////////
+
+float4 PSVertColors(vert2pixel IN) : COLOR
+{
+  return IN.vertcol;
+}
+
+// Toon Shading using a horizontal 1D Texture, unlit on left, lit on right
+float3 toon1D (float3 N,
+               float3 L, float vMask)
+{
+  float2 UVt = float2( (dot(N,L)*0.5+0.5), 0);
+  //if(useHalfLambert) UVt = float2( pow(dot(N,L)*0.5+.5,2), 0);
+  //float2 UVt = float2( pow(dot(N,L)*0.5+.5,2), 0);
+
+  return tex2D(toonRampMapSampler, UVt * vMask).rgb; //sample the 1D texture with an N.L calculation
+}
 
 float4 PSMTON_TOON (vert2pixel IN) : COLOR
 {
@@ -311,30 +317,57 @@ float4 PSMTON_TOON (vert2pixel IN) : COLOR
   // Toon Diffuse Component    //
   float3 Tc = 1.0;
   if(bVertexToonMask){
-    Tc = toon1D(N, (-light1Dir).xyz, IN.vertcol.r);
+    if(bTopologyMaskMap){
+      float normalMask = tex2D(TopologyMaskMapSampler, IN.UV).r;
+      Tc = toon1D(N, (-light1Dir).xyz, normalMask);
+      if(bEyeNORM_RimLine){
+        Tc *= toonOutline(N, IN.eyeVec, normalMask); //color Multiply lines
+        //Tc = mix(lineColor, Tc, edge); //color lines
+      }
+    }
+    else{
+      Tc = toon1D(N, (-light1Dir).xyz, IN.vertcol.r);
+      if(bEyeNORM_RimLine){
+        Tc *= toonOutline(N, IN.eyeVec, IN.vertcol.r); //color Multiply lines
+        //Tc = mix(lineColor, Tc, edge); //color lines
+      }
+    }
   }
   else{
     Tc = toon1D(N, (-light1Dir).xyz, 1.0);
   }
 
-  if(bEyeNORM_RimLine){
-    Tc *= toonOutline(N, IN.eyeVec, IN.vertcol.r); //b&w lines
-    //Tc = mix(lineColor, Tc, edge); //color lines
-  }
-
-  //float3 Tc = saturate(dot(N, L));
 
   ////////////////////////////////
   // InnderLine Texture Component  //
   float Dt = 1.0;
   if(bDiffuseTexture){
-   Dt = tex2D(DiffuseMapSampler, UV).r;
+   Dt = tex2D(DiffuseMapSampler, IN.UV2).r;
   }
 
   return float4(Tc * Dt, 1.0);
 
 }
 
+
+////////////////////////////////////////
+////// Techniques //////////////////////
+////////////////////////////////////////
+
+technique MTON_VERTCOLOR
+{
+  pass P0
+  {
+    CullFaceEnable=false;
+    DepthTestEnable=true;
+    DepthMask = true;
+    DepthFunc = LEqual;
+
+    VertexProgram   = compile vp40 VS();
+    FragmentProgram = compile fp40 PSVertColors();
+
+  }
+}
 
 technique MTON_TOON
 {

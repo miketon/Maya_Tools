@@ -153,25 +153,27 @@ float4x4 ObjectToWorld         : World                     < string UIWidget = "
 
 // input from application
 struct app2vert {
-    float4 Position : POSITION;
-    float2 TexCoord : TEXCOORD0;
-    float4 Normal   : NORMAL;
-    float4 Binormal : BINORMAL0;
-    float4 Tangent  : TANGENT0;
-	  float4 vertcol		: COLOR0; 
+    float4 Position  : POSITION ;
+    float2 TexCoord0 : TEXCOORD0;
+    float2 TexCoord1 : TEXCOORD1;
+    float4 Normal    : NORMAL   ;
+    float4 Binormal  : BINORMAL0;
+    float4 Tangent   : TANGENT0 ;
+	  float4 vertcol	 : COLOR0   ; 
 };
 
 
 // output to fragment program
 struct vert2pixel {
-    float4 position      : POSITION;
+    float4 position      : POSITION ;
     float2 UV            : TEXCOORD0;
     float3 worldNormal   : TEXCOORD1;
     float3 worldBinormal : TEXCOORD2;
     float3 worldTangent  : TEXCOORD3;
     float3 eyeVec        : TEXCOORD4;
     float3 light1Vec     : TEXCOORD5;
-	  float4 vertcol         : COLOR0; 
+    float2 UV2           : TEXCOORD6; //2nd UV for Inner Line
+	  float4 vertcol       : COLOR0   ; 
 
 };
 
@@ -189,7 +191,8 @@ vert2pixel VS(app2vert IN)
 
   OUT.eyeVec =  WorldToCamera[2].xyz;
 
-  OUT.UV = IN.TexCoord.xy;
+  OUT.UV  = IN.TexCoord0.xy;
+  OUT.UV2 = IN.TexCoord1.xy;
   OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1));
 
   //light vector for directional lights (free!)
@@ -339,7 +342,7 @@ float4 PSMTON_TOON (vert2pixel IN) : COLOR
   // InnderLine Texture Component  //
   float Dt = 1.0;
   if(bDiffuseTexture){
-   Dt = tex2D(DiffuseMapSampler, UV).r;
+   Dt = tex2D(DiffuseMapSampler, IN.UV2).r;
   }
 
   return float4(Tc * Dt, 1.0);

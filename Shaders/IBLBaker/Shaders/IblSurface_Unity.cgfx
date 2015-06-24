@@ -39,7 +39,9 @@
 //                                                                                    //
 //------------------------------------------------------------------------------------//
 
-string description = "IBL Shader";
+//  1.1 - 6/24/2015 : Mike Ton - Modified to match Unity 5.0 Standard Material (metal)
+
+string description = "IBL Shader Unity";
 
 float4x4 WorldViewProjectionMatrix : WorldViewProjection
 <
@@ -93,9 +95,18 @@ sampler2D NormalSampler = sampler_state
 };
 
 texture Mask < string ResourceType = "2D"; >;
-sampler2D MaskSampler = sampler_state 
+sampler2D MetallicSampler = sampler_state     //Unity : R=Metallic A=Smoothness(Roughness)
 {
     Texture = <Mask>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+
+texture AmbOcclusion < string ResourceType = "2D"; >;
+sampler2D AmbOcclusionSampler = sampler_state   
+{
+    Texture = <AmbOcclusion>;
     MinFilter = LinearMipMapLinear;
     MagFilter = Linear;
     MipFilter = Linear;
@@ -187,15 +198,18 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     float4 albedo = toLinear(tex2D(AlbedoSampler, input.texcoord0));
 
     // Specular material terms.
-    float4 maskMap   = tex2D(MaskSampler, input.texcoord0);
+    float4 maskMap   = tex2D(MetallicSampler, input.texcoord0);
 
-    float  roughness = 1.0 - maskMap.r;
-    float  metal     = maskMap.g;
-    float  bakedAO   = maskMap.b;
+    // Ambient Occulision : Unity separates
+    float4 AmbOcclusion = tex2D(AmbOcclusionSampler, input.texcoord0);
+
+    float  metal     = maskMap.r       ;
+    float  roughness = 1.0 - maskMap.a ; //roughness == Unity smoothness ; stored in alpha channel on Standard (metal)
+    float  bakedAO   = AmbOcclusion.r ; //maskMap.b                     ;
 
     // Compute normal.
     float3 normal     = input.normal.xyz;
-    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * float3(2,2,2)-float3(1,1,1);    
+    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * 2.0f - 1.0f; // float3(2,2,2)-float3(1,1,1);    
     normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal);
 
     // Normal dependent terms.
@@ -232,7 +246,7 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     return output;
 }
 
-technique IBLSurface 
+technique IBLSurface_Unity 
 {
     pass zero
     {

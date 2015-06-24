@@ -1,6 +1,6 @@
 //Maya ASCII 2015 scene
 //Name: ListeningChairLOD.ma
-//Last modified: Tue, Jun 23, 2015 06:42:29 PM
+//Last modified: Wed, Jun 24, 2015 08:16:31 AM
 //Codeset: UTF-8
 requires maya "2015";
 requires -nodeType "cgfxShader" "cgfxShader" "cgfxShader 4.5 for Maya 2015.0 (Mar  1 2014)";
@@ -12,14 +12,14 @@ fileInfo "cutIdentifier" "201402282131-909040";
 fileInfo "osv" "Mac OS X 10.9.3";
 fileInfo "license" "student";
 createNode transform -s -n "persp";
-	setAttr ".t" -type "double3" 103.12368477060441 188.17202689357967 299.12042759088916 ;
-	setAttr ".r" -type "double3" -23.138352729557415 18.999999999998312 0 ;
+	setAttr ".t" -type "double3" 203.93528880496552 175.35288390619525 278.26973736575741 ;
+	setAttr ".r" -type "double3" -19.538352729549239 36.200000000017191 1.9707008099410927e-15 ;
 	setAttr ".rp" -type "double3" 2.8421709430404007e-14 0 0 ;
 	setAttr ".rpt" -type "double3" -5.9641532636835551e-15 0 -1.7419866186768261e-14 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v";
 	setAttr ".fl" 34.999999999999986;
-	setAttr ".coi" 344.45862402661197;
+	setAttr ".coi" 366.39646522212655;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -263,8 +263,8 @@ createNode mesh -n "ListeningRoomChairLOD_MtonFinishedShape" -p "ListeningRoomCh
 	setAttr ".cvd" -type "dataPolyComponent" Index_Data Vertex 0 ;
 	setAttr ".hfd" -type "dataPolyComponent" Index_Data Face 0 ;
 createNode lightLinker -s -n "lightLinker1";
-	setAttr -s 5 ".lnk";
-	setAttr -s 5 ".slnk";
+	setAttr -s 4 ".lnk";
+	setAttr -s 4 ".slnk";
 createNode displayLayerManager -n "layerManager";
 	setAttr -s 2 ".dli[1]"  1;
 	setAttr -s 2 ".dli";
@@ -331,26 +331,21 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "\t\tblendShapePanel -edit -l (localizedPanelLabel(\"Blend Shape\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"dynRelEdPanel\" (localizedPanelLabel(\"Dynamic Relationships\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"dynRelEdPanel\" -l (localizedPanelLabel(\"Dynamic Relationships\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Dynamic Relationships\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"relationshipPanel\" (localizedPanelLabel(\"Relationship Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"relationshipPanel\" -l (localizedPanelLabel(\"Relationship Editor\")) -mbv $menusOkayInPanels `;\n"
 		+ "\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Relationship Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"referenceEditorPanel\" (localizedPanelLabel(\"Reference Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"referenceEditorPanel\" -l (localizedPanelLabel(\"Reference Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Reference Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"componentEditorPanel\" (localizedPanelLabel(\"Component Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"componentEditorPanel\" -l (localizedPanelLabel(\"Component Editor\")) -mbv $menusOkayInPanels `;\n"
 		+ "\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Component Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"dynPaintScriptedPanelType\" (localizedPanelLabel(\"Paint Effects\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"dynPaintScriptedPanelType\" -l (localizedPanelLabel(\"Paint Effects\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Paint Effects\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"scriptEditorPanel\" (localizedPanelLabel(\"Script Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"scriptEditorPanel\" -l (localizedPanelLabel(\"Script Editor\")) -mbv $menusOkayInPanels `;\n"
-		+ "\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Script Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\tif ($useSceneConfig) {\n        string $configName = `getPanel -cwl (localizedPanelLabel(\"Current Layout\"))`;\n        if (\"\" != $configName) {\n\t\t\tpanelConfiguration -edit -label (localizedPanelLabel(\"Current Layout\")) \n\t\t\t\t-defaultImage \"vacantCell.xP:/\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"single\\\" -ps 1 100 100 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n\t\t\t\t\t\"modelPanel\"\n"
+		+ "\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Script Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\tif ($useSceneConfig) {\n        string $configName = `getPanel -cwl (localizedPanelLabel(\"Current Layout\"))`;\n        if (\"\" != $configName) {\n\t\t\tpanelConfiguration -edit -label (localizedPanelLabel(\"Current Layout\")) \n\t\t\t\t-defaultImage \"vacantCell.xP:/\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"left3\\\" -ps 1 47 41 -ps 2 53 100 -ps 3 47 59 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypershade\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperShadePanel\\\" -l (localizedPanelLabel(\\\"Hypershade\\\")) -mbv $menusOkayInPanels `\"\n\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypershade\\\")) -mbv $menusOkayInPanels  $panelName\"\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n"
+		+ "\t\t\t\t\t\"modelPanel\"\n"
 		+ "\t\t\t\t\t\"$panelName = `modelPanel -unParent -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels `;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -ignorePanZoom 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 0\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 16384\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"vp2Renderer\\\" \\n    -objectFilterShowInHUD 1\\n    -isFiltered 0\\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 0\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -imagePlane 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -particleInstancers 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -pluginShapes 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -motionTrails 1\\n    -clipGhosts 1\\n    -greasePencils 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
 		+ "\t\t\t\t\t\"modelPanel -edit -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels  $panelName;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -ignorePanZoom 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 0\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 16384\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"vp2Renderer\\\" \\n    -objectFilterShowInHUD 1\\n    -isFiltered 0\\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 0\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -imagePlane 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -particleInstancers 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -pluginShapes 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -motionTrails 1\\n    -clipGhosts 1\\n    -greasePencils 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
+		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Node Editor\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"nodeEditorPanel\\\" -l (localizedPanelLabel(\\\"Node Editor\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"NodeEditorEd\\\");\\n            nodeEditor -e \\n                -allAttributes 0\\n                -allNodes 0\\n                -autoSizeNodes 1\\n                -createNodeCommand \\\"nodeEdCreateNodeCommand\\\" \\n                -defaultPinnedState 0\\n                -ignoreAssets 1\\n                -additiveGraphingMode 0\\n                -settingsChangedCallback \\\"nodeEdSyncControls\\\" \\n                -traversalDepthLimit -1\\n                -keyPressCommand \\\"nodeEdKeyPressCommand\\\" \\n                -keyReleaseCommand \\\"nodeEdKeyReleaseCommand\\\" \\n                -nodeTitleMode \\\"name\\\" \\n                -gridSnap 0\\n                -gridVisibility 1\\n                -popupMenuScript \\\"nodeEdBuildPanelMenus\\\" \\n                -showNamespace 1\\n                -showShapes 1\\n                -showSGShapes 0\\n                -showTransforms 1\\n                -useAssets 1\\n                -syncedSelection 1\\n                -extendToShapes 1\\n                $editorName;\\n\\t\\t\\tif (`objExists nodeEditorPanel1Info`) nodeEditor -e -restoreInfo nodeEditorPanel1Info $editorName\"\n"
+		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Node Editor\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"NodeEditorEd\\\");\\n            nodeEditor -e \\n                -allAttributes 0\\n                -allNodes 0\\n                -autoSizeNodes 1\\n                -createNodeCommand \\\"nodeEdCreateNodeCommand\\\" \\n                -defaultPinnedState 0\\n                -ignoreAssets 1\\n                -additiveGraphingMode 0\\n                -settingsChangedCallback \\\"nodeEdSyncControls\\\" \\n                -traversalDepthLimit -1\\n                -keyPressCommand \\\"nodeEdKeyPressCommand\\\" \\n                -keyReleaseCommand \\\"nodeEdKeyReleaseCommand\\\" \\n                -nodeTitleMode \\\"name\\\" \\n                -gridSnap 0\\n                -gridVisibility 1\\n                -popupMenuScript \\\"nodeEdBuildPanelMenus\\\" \\n                -showNamespace 1\\n                -showShapes 1\\n                -showSGShapes 0\\n                -showTransforms 1\\n                -useAssets 1\\n                -syncedSelection 1\\n                -extendToShapes 1\\n                $editorName;\\n\\t\\t\\tif (`objExists nodeEditorPanel1Info`) nodeEditor -e -restoreInfo nodeEditorPanel1Info $editorName\"\n"
 		+ "\t\t\t\t$configName;\n\n            setNamedPanelLayout (localizedPanelLabel(\"Current Layout\"));\n        }\n\n        panelHistory -e -clear mainPanelHistory;\n        setFocus `paneLayout -q -p1 $gMainPane`;\n        sceneUIReplacement -deleteRemaining;\n        sceneUIReplacement -clear;\n\t}\n\n\ngrid -spacing 5 -size 12 -divisions 5 -displayAxes yes -displayGridLines yes -displayDivisionLines yes -displayPerspectiveLabels no -displayOrthographicLabels no -displayAxesBold yes -perspectiveLabelPosition axis -orthographicLabelPosition edge;\nviewManip -drawCompass 1 -compassAngle 0 -frontParameters \"\" -homeParameters \"\" -selectionLockParameters \"\";\n}\n");
 	setAttr ".st" 3;
 createNode script -n "sceneConfigurationScriptNode";
 	setAttr ".b" -type "string" "playbackOptions -min 1 -max 24 -ast 1 -aet 48 ";
 	setAttr ".st" 6;
-createNode blinn -n "LoFaceUV";
-createNode shadingEngine -n "blinn1SG";
-	setAttr ".ihi" 0;
-	setAttr ".ro" yes;
-createNode materialInfo -n "materialInfo3";
-createNode file -n "file1";
-	setAttr ".ftn" -type "string" "/Users/mton/Desktop/UvDeleteme.jpg";
-createNode place2dTexture -n "place2dTexture1";
 createNode hyperGraphInfo -n "nodeEditorPanel1Info";
 createNode hyperView -n "hyperView1";
-	setAttr ".vl" -type "double2" -682.40476190476215 -254.76190476190484 ;
-	setAttr ".vh" -type "double2" 754.16666666666686 602.38095238095252 ;
+	setAttr ".vl" -type "double2" -725.29523809523812 -293.71904761904767 ;
+	setAttr ".vh" -type "double2" 716.70476190476211 564.61428571428576 ;
 	setAttr ".dag" no;
 createNode hyperLayout -n "hyperLayout1";
 	setAttr ".ihi" 0;
@@ -392,13 +387,13 @@ createNode hyperLayout -n "hyperLayout1";
 	setAttr ".hyp[11].y" 284.28570556640625;
 	setAttr ".hyp[11].nvs" 1920;
 	setAttr ".hyp[12].x" -154.40475463867188;
-	setAttr ".hyp[12].y" 355.71429443359375;
+	setAttr ".hyp[12].y" 498.57144165039062;
 	setAttr ".hyp[12].nvs" 1920;
 	setAttr ".hyp[13].x" -154.40475463867188;
-	setAttr ".hyp[13].y" 427.14285278320312;
+	setAttr ".hyp[13].y" 355.71429443359375;
 	setAttr ".hyp[13].nvs" 1920;
 	setAttr ".hyp[14].x" -154.40475463867188;
-	setAttr ".hyp[14].y" 498.57144165039062;
+	setAttr ".hyp[14].y" 427.14285278320312;
 	setAttr ".hyp[14].nvs" 1920;
 	setAttr ".anf" yes;
 createNode cgfxShader -n "cgfxShader1";
@@ -411,10 +406,6 @@ createNode cgfxShader -n "cgfxShader1";
 	addAttr -ci true -sn "NormalSamplerR" -ln "NormalSamplerR" -at "float" -p "NormalSampler";
 	addAttr -ci true -sn "NormalSamplerG" -ln "NormalSamplerG" -at "float" -p "NormalSampler";
 	addAttr -ci true -sn "NormalSamplerB" -ln "NormalSamplerB" -at "float" -p "NormalSampler";
-	addAttr -ci true -uac -sn "MaskSampler" -ln "MaskSampler" -at "float3" -nc 3;
-	addAttr -ci true -sn "MaskSamplerR" -ln "MaskSamplerR" -at "float" -p "MaskSampler";
-	addAttr -ci true -sn "MaskSamplerG" -ln "MaskSamplerG" -at "float" -p "MaskSampler";
-	addAttr -ci true -sn "MaskSamplerB" -ln "MaskSamplerB" -at "float" -p "MaskSampler";
 	addAttr -ci true -uac -sn "BrdfSampler" -ln "BrdfSampler" -at "float3" -nc 3;
 	addAttr -ci true -sn "BrdfSamplerR" -ln "BrdfSamplerR" -at "float" -p "BrdfSampler";
 	addAttr -ci true -sn "BrdfSamplerG" -ln "BrdfSamplerG" -at "float" -p "BrdfSampler";
@@ -435,11 +426,24 @@ createNode cgfxShader -n "cgfxShader1";
 		-p "SpecularLightingSampler";
 	addAttr -ci true -sn "SpecularLightingSamplerB" -ln "SpecularLightingSamplerB" -at "float" 
 		-p "SpecularLightingSampler";
+	addAttr -ci true -uac -sn "MetallicSampler" -ln "MetallicSampler" -at "float3" -nc 
+		3;
+	addAttr -ci true -sn "MetallicSamplerR" -ln "MetallicSamplerR" -at "float" -p "MetallicSampler";
+	addAttr -ci true -sn "MetallicSamplerG" -ln "MetallicSamplerG" -at "float" -p "MetallicSampler";
+	addAttr -ci true -sn "MetallicSamplerB" -ln "MetallicSamplerB" -at "float" -p "MetallicSampler";
+	addAttr -ci true -uac -sn "AmbOcclusionSampler" -ln "AmbOcclusionSampler" -at "float3" 
+		-nc 3;
+	addAttr -ci true -sn "AmbOcclusionSamplerR" -ln "AmbOcclusionSamplerR" -at "float" 
+		-p "AmbOcclusionSampler";
+	addAttr -ci true -sn "AmbOcclusionSamplerG" -ln "AmbOcclusionSamplerG" -at "float" 
+		-p "AmbOcclusionSampler";
+	addAttr -ci true -sn "AmbOcclusionSamplerB" -ln "AmbOcclusionSamplerB" -at "float" 
+		-p "AmbOcclusionSampler";
 	setAttr ".vpar" -type "stringArray" 0  ;
 	setAttr ".upar" -type "stringArray" 0  ;
-	setAttr ".s" -type "string" "Shaders/IBLBaker/Shaders/IblSurface.cgfx";
+	setAttr ".s" -type "string" "Shaders/IBLBaker/Shaders/IblSurface_Unity.cgfx";
 	setAttr ".t" -type "string" "IBLSurface";
-	setAttr ".al" -type "stringArray" 20 "description\t4" "WorldViewProjectionMatrix\t25\t\tWorldViewProjection" "ViewMatrix\t22\t\tView" "WorldMatrix\t21\t\tWorld" "WorldInverseMatrix\t21\t\tWorldInverse" "WorldViewMatrix\t24\t\tWorldView" "ViewInverseMatrix\t22\t\tViewInverse" "WorldViewInverseMatrix\t24\t\tWorldViewInverse" "Albedo\t35" "AlbedoSampler\t27" "Normal\t35" "NormalSampler\t27" "Mask\t35" "MaskSampler\t27" "Brdf\t35" "BrdfSampler\t27" "DiffuseLight\t35\t\tEnvironment" "DiffuseLightingSampler\t32" "SpecularLight\t35\t\tEnvironment" "SpecularLightingSampler\t32"  ;
+	setAttr ".al" -type "stringArray" 22 "description\t4" "WorldViewProjectionMatrix\t25\t\tWorldViewProjection" "ViewMatrix\t22\t\tView" "WorldMatrix\t21\t\tWorld" "WorldInverseMatrix\t21\t\tWorldInverse" "WorldViewMatrix\t24\t\tWorldView" "ViewInverseMatrix\t22\t\tViewInverse" "WorldViewInverseMatrix\t24\t\tWorldViewInverse" "Albedo\t35" "AlbedoSampler\t27" "Normal\t35" "NormalSampler\t27" "Mask\t35" "MetallicSampler\t27" "AmbOcclusion\t35" "AmbOcclusionSampler\t27" "Brdf\t35" "BrdfSampler\t27" "DiffuseLight\t35\t\tEnvironment" "DiffuseLightingSampler\t32" "SpecularLight\t35\t\tEnvironment" "SpecularLightingSampler\t32"  ;
 	setAttr ".val" -type "stringArray" 20 "position" "float4" "" "POSITION" "normal" "float3" "" "NORMAL" "texcoord0" "float4" "" "TEXCOORD0" "tangent" "float3" "" "TEXCOORD6" "binormal" "float3" "" "TEXCOORD7"  ;
 	setAttr ".vas" -type "stringArray" 5 "position" "normal" "uv:map1" "tangent:map1" "binormal:map1"  ;
 	setAttr ".tcs" -type "stringArray" 0  ;
@@ -464,30 +468,30 @@ createNode place2dTexture -n "place2dTexture5";
 createNode file -n "file6";
 	setAttr ".ftn" -type "string" "/Users/mton/Dropbox/Code/mtonCode/Maya_Tools//Shaders/IBLBaker/maya/chair/ListeningRoomChairNormals.tif";
 createNode place2dTexture -n "place2dTexture6";
-createNode file -n "file7";
-	setAttr ".ftn" -type "string" "/Users/mton/Dropbox/Code/mtonCode/Maya_Tools//Shaders/IBLBaker/maya/chair/ListeningRoomChairSpecularGloss.tif";
-createNode place2dTexture -n "place2dTexture7";
 createNode cameraView -n "cameraView1";
 	setAttr ".e" -type "double3" 103.12368477060441 188.17202689357967 299.12042759088916 ;
 	setAttr ".coi" -type "double3" -3.836930773104541e-13 52.816066741943132 -0.37249946594187122 ;
 	setAttr ".u" -type "double3" -0.1279328983731193 0.91955866809698783 -0.37154411506784346 ;
 	setAttr ".tp" -type "double3" 0 52.816066741943359 -0.37249946594238281 ;
 	setAttr ".fl" 34.999999999999986;
+createNode file -n "file7";
+	setAttr ".ftn" -type "string" "/Users/mton/Dropbox/Code/mtonCode/Maya_Tools//Shaders/IBLBaker/maya/chair/ListeningRoomChairSpecularGloss.tif";
+createNode place2dTexture -n "place2dTexture7";
 select -ne :time1;
 	setAttr ".o" 1;
 	setAttr ".unw" 1;
 select -ne :renderPartition;
-	setAttr -s 4 ".st";
+	setAttr -s 3 ".st";
 select -ne :renderGlobalsList1;
 select -ne :defaultShaderList1;
-	setAttr -s 4 ".s";
+	setAttr -s 3 ".s";
 select -ne :postProcessList1;
 	setAttr -s 2 ".p";
 select -ne :defaultRenderUtilityList1;
-	setAttr -s 7 ".u";
+	setAttr -s 6 ".u";
 select -ne :defaultRenderingList1;
 select -ne :defaultTextureList1;
-	setAttr -s 7 ".tx";
+	setAttr -s 6 ".tx";
 select -ne :initialShadingGroup;
 	setAttr ".ro" yes;
 select -ne :initialParticleSE;
@@ -508,37 +512,12 @@ connectAttr "cameraView1.msg" ":perspShape.b" -na;
 relationship "link" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
 relationship "link" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
 relationship "link" ":lightLinker1" "cgfxShader1SG.message" ":defaultLightSet.message";
-relationship "link" ":lightLinker1" "blinn1SG.message" ":defaultLightSet.message";
 relationship "shadowLink" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
 relationship "shadowLink" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
 relationship "shadowLink" ":lightLinker1" "cgfxShader1SG.message" ":defaultLightSet.message";
-relationship "shadowLink" ":lightLinker1" "blinn1SG.message" ":defaultLightSet.message";
 connectAttr "layerManager.dli[0]" "defaultLayer.id";
 connectAttr "renderLayerManager.rlmi[0]" "defaultRenderLayer.rlid";
 connectAttr "layerManager.dli[1]" "Collision.id";
-connectAttr "file1.oc" "LoFaceUV.c";
-connectAttr "LoFaceUV.oc" "blinn1SG.ss";
-connectAttr "blinn1SG.msg" "materialInfo3.sg";
-connectAttr "LoFaceUV.msg" "materialInfo3.m";
-connectAttr "file1.msg" "materialInfo3.t" -na;
-connectAttr "place2dTexture1.c" "file1.c";
-connectAttr "place2dTexture1.tf" "file1.tf";
-connectAttr "place2dTexture1.rf" "file1.rf";
-connectAttr "place2dTexture1.mu" "file1.mu";
-connectAttr "place2dTexture1.mv" "file1.mv";
-connectAttr "place2dTexture1.s" "file1.s";
-connectAttr "place2dTexture1.wu" "file1.wu";
-connectAttr "place2dTexture1.wv" "file1.wv";
-connectAttr "place2dTexture1.re" "file1.re";
-connectAttr "place2dTexture1.of" "file1.of";
-connectAttr "place2dTexture1.r" "file1.ro";
-connectAttr "place2dTexture1.n" "file1.n";
-connectAttr "place2dTexture1.vt1" "file1.vt1";
-connectAttr "place2dTexture1.vt2" "file1.vt2";
-connectAttr "place2dTexture1.vt3" "file1.vt3";
-connectAttr "place2dTexture1.vc1" "file1.vc1";
-connectAttr "place2dTexture1.o" "file1.uv";
-connectAttr "place2dTexture1.ofs" "file1.fs";
 connectAttr "hyperView1.msg" "nodeEditorPanel1Info.b[0]";
 connectAttr "hyperLayout1.msg" "hyperView1.hl";
 connectAttr "cgfxShader1.msg" "hyperLayout1.hyp[0].dn";
@@ -553,15 +532,16 @@ connectAttr "file5.msg" "hyperLayout1.hyp[8].dn";
 connectAttr "place2dTexture5.msg" "hyperLayout1.hyp[9].dn";
 connectAttr "file6.msg" "hyperLayout1.hyp[10].dn";
 connectAttr "place2dTexture6.msg" "hyperLayout1.hyp[11].dn";
-connectAttr "file7.msg" "hyperLayout1.hyp[12].dn";
-connectAttr "place2dTexture7.msg" "hyperLayout1.hyp[13].dn";
-connectAttr "cameraView1.msg" "hyperLayout1.hyp[14].dn";
+connectAttr "cameraView1.msg" "hyperLayout1.hyp[12].dn";
+connectAttr "file7.msg" "hyperLayout1.hyp[13].dn";
+connectAttr "place2dTexture7.msg" "hyperLayout1.hyp[14].dn";
 connectAttr "file2.oc" "cgfxShader1.AlbedoSampler";
 connectAttr "file3.oc" "cgfxShader1.BrdfSampler";
 connectAttr "file4.oc" "cgfxShader1.DiffuseLightingSampler";
 connectAttr "file5.oc" "cgfxShader1.SpecularLightingSampler";
 connectAttr "file6.oc" "cgfxShader1.NormalSampler";
-connectAttr "file7.oc" "cgfxShader1.MaskSampler";
+connectAttr "file7.oc" "cgfxShader1.MetallicSampler";
+connectAttr "file2.oc" "cgfxShader1.AmbOcclusionSampler";
 connectAttr "cgfxShader1.oc" "cgfxShader1SG.ss";
 connectAttr "ListeningRoomChairLOD_MtonFinishedShape.iog" "cgfxShader1SG.dsm" -na
 		;
@@ -675,11 +655,8 @@ connectAttr "place2dTexture7.vt3" "file7.vt3";
 connectAttr "place2dTexture7.vc1" "file7.vc1";
 connectAttr "place2dTexture7.o" "file7.uv";
 connectAttr "place2dTexture7.ofs" "file7.fs";
-connectAttr "blinn1SG.pa" ":renderPartition.st" -na;
 connectAttr "cgfxShader1SG.pa" ":renderPartition.st" -na;
-connectAttr "LoFaceUV.msg" ":defaultShaderList1.s" -na;
 connectAttr "cgfxShader1.msg" ":defaultShaderList1.s" -na;
-connectAttr "place2dTexture1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture2.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture3.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture4.msg" ":defaultRenderUtilityList1.u" -na;
@@ -687,7 +664,6 @@ connectAttr "place2dTexture5.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture6.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture7.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "defaultRenderLayer.msg" ":defaultRenderingList1.r" -na;
-connectAttr "file1.msg" ":defaultTextureList1.tx" -na;
 connectAttr "file2.msg" ":defaultTextureList1.tx" -na;
 connectAttr "file3.msg" ":defaultTextureList1.tx" -na;
 connectAttr "file4.msg" ":defaultTextureList1.tx" -na;
@@ -695,6 +671,6 @@ connectAttr "file5.msg" ":defaultTextureList1.tx" -na;
 connectAttr "file6.msg" ":defaultTextureList1.tx" -na;
 connectAttr "file7.msg" ":defaultTextureList1.tx" -na;
 dataStructure -fmt "raw" -as "name=externalContentTable:string=node:string=key:string=upath:uint32=upathcrc:string=rpath:string=roles";
-applyMetadata -fmt "raw" -v "channel\nname externalContentTable\nstream\nname v1.0\nindexType numeric\nstructure externalContentTable\n0\n\"file1\" \"fileTextureName\" \"/Users/mton/Desktop/UvDeleteme.jpg\" 220669689 \"\" \"sourceImages\"\n1\n\"file2\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairOcclusion.tif\" 1832873081 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairOcclusion.tif\" \"sourceImages\"\n2\n\"file3\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/brdfMDR.dds\" 919490557 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/brdfMDR.dds\" \"sourceImages\"\n3\n\"file4\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillDiffuseMDR.dds\" 2024738409 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillDiffuseMDR.dds\" \"sourceImages\"\n4\n\"file5\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillSpecularMDR.dds\" 1196273330 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillSpecularMDR.dds\" \"sourceImages\"\n5\n\"file6\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairNormals.tif\" 3429980905 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairNormals.tif\" \"sourceImages\"\n6\n\"file7\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairSpecularGloss.tif\" 456243986 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairSpecularGloss.tif\" \"sourceImages\"\nendStream\nendChannel\nendAssociations\n" 
+applyMetadata -fmt "raw" -v "channel\nname externalContentTable\nstream\nname v1.0\nindexType numeric\nstructure externalContentTable\n0\n\"file2\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairOcclusion.tif\" 1832873081 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairOcclusion.tif\" \"sourceImages\"\n1\n\"file3\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/brdfMDR.dds\" 919490557 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/brdfMDR.dds\" \"sourceImages\"\n2\n\"file4\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillDiffuseMDR.dds\" 2024738409 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillDiffuseMDR.dds\" \"sourceImages\"\n3\n\"file5\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillSpecularMDR.dds\" 1196273330 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/Textures/paperMillSpecularMDR.dds\" \"sourceImages\"\n4\n\"file6\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairNormals.tif\" 3429980905 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairNormals.tif\" \"sourceImages\"\n5\n\"file7\" \"fileTextureName\" \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairSpecularGloss.tif\" 456243986 \"/Users/mton/Dropbox/Code/mtonCode/Maya_Tools/Shaders/IBLBaker/maya/chair/ListeningRoomChairSpecularGloss.tif\" \"sourceImages\"\nendStream\nendChannel\nendAssociations\n" 
 		-scn;
 // End of ListeningChairLOD.ma

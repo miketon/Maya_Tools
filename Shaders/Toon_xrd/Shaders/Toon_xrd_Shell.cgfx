@@ -121,14 +121,14 @@ vert2pixel VS_ToonShell(app2vert IN)
 {
   vert2pixel OUT;
 
-  OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1));
+  //OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1.0));
 
   OUT.worldNormal   = mul(WorldInverseTranspose, IN.Normal).xyz;
   OUT.worldNormal.x *= ObjectToNdc[0][0];
   OUT.worldNormal.y *= ObjectToNdc[1][1];
 
 	OUT.vertcol = IN.vertcol; //passing through vertex color
-  OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1));
+  OUT.position = mul(ObjectToNdc, float4(IN.Position.xyz,1.0));
 
   if(bVertexToonMask){
     OUT.position.xy += OUT.worldNormal.xy * OUT.position.z * fShell_Outline * pow(1.0-IN.vertcol.r, fShell_Outline_Pow); 

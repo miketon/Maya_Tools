@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------------//
 
 //  1.1 - 6/24/2015 : Mike Ton - Modified to match Unity 5.0 Standard Material (metal)
+//  1.2 - 6/27/2015 : Mike Ton - Adding cutout and alpha techniques
 
 string description = "IBL Shader Unity";
 

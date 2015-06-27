@@ -80,9 +80,11 @@ sampler2D AlbedoSampler = sampler_state
     MinFilter = LinearMipMapLinear;
     MagFilter = Linear;
     MipFilter = Linear;
-    WrapS = ClampToEdge;
-    WrapT = ClampToEdge;
-    WrapR = ClampToEdge;
+    //WrapS = ClampToEdge;
+    //WrapT = ClampToEdge;
+    //WrapR = ClampToEdge; //What is WrapR ???
+    WrapS         = Wrap;
+    WrapT         = Wrap;
 };
 
 texture Normal < string ResourceType = "2D"; >;
@@ -190,6 +192,24 @@ float4 RGBMDecode ( float4 rgbm )
   return 5.0 * rgbm.rgba * rgbm.a;
 }
 
+////////////////////////////////////////
+// Alpha Texture
+
+bool alphaToggle
+<
+  string UIName   = "Alpha Toggle (diffuse.a)";
+> = true;
+
+float alphaFloat
+<
+  float UIMin     = 0.0f  ;
+  float UIMax     = 1.0f  ;
+  float UIStep    = 0.01f ;
+  string UIName   = "Alpha Float";
+> = 1.0f;
+
+////////////////////////////////////////
+
 float4 IblSurfaceFS(VertexOutput input) : COLOR
 {
     float4 output;
@@ -205,20 +225,20 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
 
     float  metal     = maskMap.r       ;
     float  roughness = 1.0 - maskMap.a ; //roughness == Unity smoothness ; stored in alpha channel on Standard (metal)
-    float  bakedAO   = AmbOcclusion.r ; //maskMap.b                     ;
+    float  bakedAO   = AmbOcclusion.r  ; //maskMap.b                     ;
 
     // Compute normal.
-    float3 normal     = input.normal.xyz;
-    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * 2.0f - 1.0f; // float3(2,2,2)-float3(1,1,1);    
-    normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal);
+    float3 normal     = input.normal.xyz                                                                             ;
+    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * 2.0f - 1.0f                                      ; // float3(2,2,2)-float3(1,1,1) ;
+    normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal) ;
 
     // Normal dependent terms.
-    float  NoV = -dot (input.eye.xyz, normal.xyz);
-    float3 reflection = normalize(reflect(input.eye.xyz, normal.xyz));
+    float  NoV = -dot (input.eye.xyz, normal.xyz)                     ;
+    float3 reflection = normalize(reflect(input.eye.xyz, normal.xyz)) ;
 
     // Diffuse.
-    float4 diffuseEnvironment  = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159;    
-    float4 diffuse     = albedo * (1.0 - metal) * diffuseEnvironment; 
+    float4 diffuseEnvironment = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159 ;
+    float4 diffuse            = albedo * (1.0 - metal) * diffuseEnvironment                                          ;
 
     // Specular.
     // Alter roughnessMipCount depending on the output resolution of the baker.
@@ -226,19 +246,26 @@ float4 IblSurfaceFS(VertexOutput input) : COLOR
     // Already flipped because roughness is encoded as gloss in the cerberus model.
     float3 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz;
 
-    float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount)));
-    const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f);
+    float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount))) ;
+    const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f)                                                                        ;
 
     // Hack version to decrease fresnel the more metal a meterial is.
     //float4 specular = lerp(dielectricColor, albedo, metal) * brdf.x + (brdf.y*(clamp(1.0-metal, 0.04f, 1.0f)));
     // Non hack version.
-    float4 specular                   = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y;
+    float4 specular               = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y ;
+    specular                      = specularEnvironment * specular                         ;
 
-    specular                      = specularEnvironment * specular;
-
-    // Final.
-    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
-    output = float4(toGamma(output.rgb), 1.0);
+    // Final
+    if(alphaToggle){
+      float alpha = albedo.a;
+      output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
+      //output = float4(0.0f, 1.0f, 0.0f, alphaFloat);
+      output = float4(toGamma(output.rgb), albedo.a);
+    }
+    else{
+      output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
+      output = float4(toGamma(output.rgb), 1.0);
+    }
 
     
     // Debug, verify roughness lookup.
@@ -258,3 +285,36 @@ technique IBLSurface_Unity
         PixelShader     = compile fp40 IblSurfaceFS();
     }
 }
+
+technique IBLSurface_Unity_1_Bit_Alpha //onebit alpha testing
+{
+  pass P0
+  {
+    //DepthTestEnable = true;
+    //DepthMask       = true;
+    CullFaceEnable  = false;
+
+    AlphaTestEnable = true;           //alpha test flag
+    AlphaFunc       = float2(Greater, .5);  //alpha test flag
+
+    VertexShader    = compile vp40 IblSurfaceVS();
+    PixelShader     = compile fp40 IblSurfaceFS();
+  }
+}
+
+technique IBLSurface_Unity_8_Bit_Alpha //onebit alpha testing
+{
+  pass P0
+  {
+    DepthTestEnable = true;
+    DepthMask       = true;
+    CullFaceEnable  = false;
+
+    BlendEnable = true;                             //alpha blending flag
+    blendfunc = float2(srcalpha, oneminussrcalpha); //alpha blending flag
+
+    VertexShader    = compile vp40 IblSurfaceVS();
+    PixelShader     = compile fp40 IblSurfaceFS();
+  }
+}
+

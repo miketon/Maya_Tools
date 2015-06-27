@@ -44,6 +44,9 @@
 
 string description = "IBL Shader Unity";
 
+bool spacer_AlbedoAlpha <string UIName   = ">>Alpha is read from Albedo/Diffuse Sampler alpha channel >>" ; > = false ;
+bool spacer_8_Bit_Alpha <string UIName   = ">>8-Bit Alpha has sorting issues : Use 1_Bit when possible>>" ; > = false ;
+
 float4x4 WorldViewProjectionMatrix : WorldViewProjection
 <
     string UIWidget = "none";
@@ -77,92 +80,92 @@ float4x4 WorldViewInverseMatrix : WorldViewInverse
 texture Albedo < string ResourceType = "2D"; >;
 sampler2D AlbedoSampler = sampler_state 
 {
-    Texture = <Albedo>;
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Linear;
-    MipFilter = Linear;
-    //WrapS = ClampToEdge;
-    //WrapT = ClampToEdge;
-    //WrapR = ClampToEdge; //What is WrapR ???
-    WrapS         = Wrap;
-    WrapT         = Wrap;
-};
+    Texture   = <Albedo>           ;
+    MinFilter = LinearMipMapLinear ;
+    MagFilter = Linear             ;
+    MipFilter = Linear             ;
+    //WrapS   = ClampToEdge        ;
+    //WrapT   = ClampToEdge        ;
+    //WrapR   = ClampToEdge        ; //What is WrapR ???
+    WrapS     = Wrap               ;
+    WrapT     = Wrap               ;
+}                                  ;
 
 texture Normal < string ResourceType = "2D"; >;
 sampler2D NormalSampler = sampler_state 
 {
-    Texture = <Normal>;
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Linear;
-    MipFilter = Linear;
-};
+    Texture   = <Normal>           ;
+    MinFilter = LinearMipMapLinear ;
+    MagFilter = Linear             ;
+    MipFilter = Linear             ;
+}                                  ;
 
 texture Mask < string ResourceType = "2D"; >;
 sampler2D MetallicSampler = sampler_state     //Unity : R=Metallic A=Smoothness(Roughness)
 {
-    Texture = <Mask>;
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Linear;
-    MipFilter = Linear;
-};
+    Texture   = <Mask>             ;
+    MinFilter = LinearMipMapLinear ;
+    MagFilter = Linear             ;
+    MipFilter = Linear             ;
+}                                  ;
 
 texture AmbOcclusion < string ResourceType = "2D"; >;
 sampler2D AmbOcclusionSampler = sampler_state   
 {
-    Texture = <AmbOcclusion>;
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Linear;
-    MipFilter = Linear;
-};
+    Texture   = <AmbOcclusion>     ;
+    MinFilter = LinearMipMapLinear ;
+    MagFilter = Linear             ;
+    MipFilter = Linear             ;
+}                                  ;
 
 texture Brdf < string ResourceType = "2D"; >;
 sampler2D BrdfSampler = sampler_state 
 {
-    Texture = <Brdf>;
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Linear;
-    MipFilter = Linear;
-};
+    Texture   = <Brdf>             ;
+    MinFilter = LinearMipMapLinear ;
+    MagFilter = Linear             ;
+    MipFilter = Linear             ;
+}                                  ;
 
 texture DiffuseLight : Environment < string ResourceType = "Cube"; >;
 samplerCUBE DiffuseLightingSampler = sampler_state 
 {
-    Texture = <DiffuseLight>;
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Linear;
-    WrapS = ClampToEdge;
-    WrapT = ClampToEdge;
-    WrapR = ClampToEdge;
-};
+    Texture   = <DiffuseLight>     ;
+    MinFilter = LinearMipMapLinear ;
+    MagFilter = Linear             ;
+    WrapS     = ClampToEdge        ;
+    WrapT     = ClampToEdge        ;
+    WrapR     = ClampToEdge        ;
+}                                  ;
 
 texture SpecularLight : Environment < string ResourceType = "Cube"; >;
 samplerCUBE SpecularLightingSampler = sampler_state 
 {
-    Texture = <SpecularLight>;
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Linear;
-    WrapS = ClampToEdge;
-    WrapT = ClampToEdge;
-    WrapR = ClampToEdge;
-};
+    Texture   = <SpecularLight>    ;
+    MinFilter = LinearMipMapLinear ;
+    MagFilter = Linear             ;
+    WrapS     = ClampToEdge        ;
+    WrapT     = ClampToEdge        ;
+    WrapR     = ClampToEdge        ;
+}                                  ;
 
 struct VertexInput
 {
-    float4 position	: POSITION;
-    float3 normal     : NORMAL;
-    float4 texcoord0  : TEXCOORD0;
-    float4 texcoord1  : TEXCOORD1;
-    float3 tangent    : TEXCOORD6;//TANGENT;
-    float3 binormal   : TEXCOORD7;//BINORMAL;
+    float4 position  : POSITION  ;
+    float3 normal    : NORMAL    ;
+    float4 texcoord0 : TEXCOORD0 ;
+    float4 texcoord1 : TEXCOORD1 ;
+    float3 tangent   : TEXCOORD6 ; //TANGENT  ;
+    float3 binormal  : TEXCOORD7 ; //BINORMAL ;
 };
 
 struct VertexOutput {
-    float4 position    : POSITION;
-    float2 texcoord0   : TEXCOORD0;
-    float3 eye         : TEXCOORD2;
-    float3 normal      : TEXCOORD4;
-    float3 tangent     : TEXCOORD6;
-    float3 binormal    : TEXCOORD7;
+    float4 position  : POSITION  ;
+    float2 texcoord0 : TEXCOORD0 ;
+    float3 eye       : TEXCOORD2 ;
+    float3 normal    : TEXCOORD4 ;
+    float3 tangent   : TEXCOORD6 ;
+    float3 binormal  : TEXCOORD7 ;
 };
 
 ////////////////////////////////////////
@@ -171,14 +174,14 @@ struct VertexOutput {
 
 VertexOutput IblSurfaceVS(VertexInput input) {
 
-    VertexOutput output;
-    output.position  =  mul(WorldViewProjectionMatrix, float4(input.position.xyz, 1.0));
-    output.texcoord0 = input.texcoord0;
-    output.eye       = normalize(mul(WorldMatrix, input.position) - mul(ViewInverseMatrix, float4(0,0,0,1))).xyz;
-    output.normal    = normalize(mul(mat3(WorldMatrix), input.normal));
-    output.binormal  = normalize(mul(mat3(WorldMatrix), input.binormal));
-    output.tangent   = normalize(mul(mat3(WorldMatrix), input.tangent));
-    return output;
+    VertexOutput output                                                                                          ;
+    output.position  =  mul(WorldViewProjectionMatrix, float4(input.position.xyz, 1.0))                          ;
+    output.texcoord0 = input.texcoord0                                                                           ;
+    output.eye       = normalize(mul(WorldMatrix, input.position) - mul(ViewInverseMatrix, float4(0,0,0,1))).xyz ;
+    output.normal    = normalize(mul(mat3(WorldMatrix), input.normal))                                           ;
+    output.binormal  = normalize(mul(mat3(WorldMatrix), input.binormal))                                         ;
+    output.tangent   = normalize(mul(mat3(WorldMatrix), input.tangent))                                          ;
+    return output                                                                                                ;
 }
 
 float3 toGamma( float3 linear) 
@@ -198,7 +201,7 @@ float4 RGBMDecode ( float4 rgbm )
 
 ////////////////////////////////////////
 
-float4 IblSurfaceColor(VertexOutput input) //Can't have : COLOR semantic; only one entry function
+float4 IblSurfaceColor(VertexOutput input) //NOTE : Can't have : COLOR semantic; only one entry function
 {
     float4 output;
 
@@ -258,13 +261,13 @@ float4 IblSurfaceColor(VertexOutput input) //Can't have : COLOR semantic; only o
 
 float4 IblSurfaceFS_Opque(VertexOutput input) : COLOR
 {
-  return float4(IblSurfaceColor(input))                      ; //Return opaque color 
+  return float4(IblSurfaceColor(input))                      ; //Return opaque color : Setup to use Technique to handle alpha vs. alphaBool
 }
 
 float4 IblSurfaceFS_Alpha(VertexOutput input) : COLOR
 {
   float  diffAlpha = tex2D(AlbedoSampler, input.texcoord0).a ;
-  return float4(IblSurfaceColor(input).rgb, diffAlpha)       ; //Modify opaque color alpha channel before returning
+  return float4(IblSurfaceColor(input).rgb, diffAlpha)       ; //Modify opaque alpha : Setup to use Technique to handle alpha vs. alphaBool
 }
 
 ////////////////////////////////////////
@@ -315,4 +318,5 @@ technique IBLSurface_Unity_8_Bit_Alpha //onebit alpha testing
     PixelShader     = compile fp40 IblSurfaceFS_Alpha() ;
   }
 }
+
 

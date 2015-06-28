@@ -1,6 +1,6 @@
 //Maya ASCII 2015 scene
 //Name: ZbrushDemoHead_xrd.ma
-//Last modified: Fri, Jun 19, 2015 10:53:44 AM
+//Last modified: Fri, Jun 19, 2015 11:03:17 AM
 //Codeset: UTF-8
 requires maya "2015";
 requires -nodeType "cgfxShader" -nodeType "cgfxVector" "cgfxShader" "cgfxShader 4.5 for Maya 2015.0 (Mar  1 2014)";
@@ -45078,7 +45078,6 @@ createNode cgfxShader -n "Toon_xrd";
 	setAttr -k on ".lineThresholdOffSet" 0.10000000149011612;
 	setAttr -k on ".linePow" 0.75;
 	setAttr -k on ".bEyeNORM_RimLine" yes;
-	setAttr -k on ".bTopologyMaskMap" yes;
 createNode shadingEngine -n "cgfxShader2SG";
 	setAttr ".ihi" 0;
 	setAttr -s 2 ".dsm";

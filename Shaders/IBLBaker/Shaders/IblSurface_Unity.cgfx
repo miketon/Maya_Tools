@@ -156,22 +156,22 @@ samplerCUBE SpecularLightingSampler = sampler_state
 //Constants
 float4 constAlbedoColor
 <
-  string UIName   = "Albedo Color";
-  string Type     = "Color";
+  string UIName   = "constAlbedoColor" ;
+  string Type     = "Color"            ;
 > = {0.9, 0.9, 0.9, 1.0};
 
 float constRoughness <
-    string UIWidget = "slider";
-    float UIMin = 0.0;
-    float UIMax = 1.0;
-    float UIStep = 0.01;
+    string UIWidget = "slider" ;
+    float UIMin     = 0.0      ;
+    float UIMax     = 1.0      ;
+    float UIStep    = 0.01     ;
 > = 1.0;
 
 float constMetalness <
-    string UIWidget = "slider";
-    float UIMin = 0.0;
-    float UIMax = 1.0;
-    float UIStep = 0.01;
+    string UIWidget = "slider" ;
+    float UIMin     = 0.0      ;
+    float UIMax     = 1.0      ;
+    float UIStep    = 0.01     ;
 > = 1.0;
 
 struct VertexInput
@@ -226,6 +226,26 @@ float4 RGBMDecode ( float4 rgbm )
 
 ////////////////////////////////////////
 
+float4 Ibl_Specular(float IN_metal, float IN_roughness, float3 IN_normal, float3 IN_eyeVec, float4 IN_albedo) 
+{
+    // Normal dependent terms.
+    float  NoV        = -dot (IN_eyeVec, IN_normal)              ;
+    float3 reflection = normalize(reflect(IN_eyeVec, IN_normal)) ;
+
+    // Alter roughnessMipCount depending on the output resolution of the baker.
+    const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f)                                                                        ;
+    const float roughnessMipCount = 9.0f                                                                                                     ;
+    float  roughness              = 1.0 - IN_roughness                                                                                       ;
+    float3 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz                                              ;
+    float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount))) ;
+
+    // Hack version to decrease fresnel the more metal a meterial is.
+    //float4 specular = lerp(dielectricColor, IN_albedo, IN_metal) * brdf.x + (brdf.y*(clamp(1.0-IN_metal, 0.04f, 1.0f)));
+    // Non hack version.
+    float4 specular                   = lerp(dielectricColor, IN_albedo, IN_metal) * brdf.x + brdf.y ;
+    return specularEnvironment * specular                                                            ;
+}
+
 float4 IblSurfaceColor(VertexOutput input) //NOTE : Can't have : COLOR semantic; only one entry function
 {
     float4 output;
@@ -248,57 +268,22 @@ float4 IblSurfaceColor(VertexOutput input) //NOTE : Can't have : COLOR semantic;
     float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * 2.0f - 1.0f                                      ; // float3(2,2,2)-float3(1,1,1) ;
     normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal) ;
 
-    // Normal dependent terms.
-    float  NoV = -dot (input.eye.xyz, normal.xyz)                     ;
-    float3 reflection = normalize(reflect(input.eye.xyz, normal.xyz)) ;
-
     // Diffuse.
     float4 diffuseEnvironment = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159 ;
     float4 diffuse            = albedo * (1.0 - metal) * diffuseEnvironment                                          ;
 
     // Specular.
-    // Alter roughnessMipCount depending on the output resolution of the baker.
-    const float roughnessMipCount = 9.0f; 
-    // Already flipped because roughness is encoded as gloss in the cerberus model.
-    float3 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz;
-
-    float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount))) ;
-    const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f)                                                                        ;
-
-    // Hack version to decrease fresnel the more metal a meterial is.
-    //float4 specular = lerp(dielectricColor, albedo, metal) * brdf.x + (brdf.y*(clamp(1.0-metal, 0.04f, 1.0f)));
-    // Non hack version.
-    float4 specular               = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y ;
-    specular                      = specularEnvironment * specular                         ;
+    float4 specular = Ibl_Specular(metal, roughness, normal.xyz, input.eye.xyz, albedo);
 
     // Final
-    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
-    output = float4(toGamma(output.rgb), 1.0);
+    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1) ;
+    output = float4(toGamma(output.rgb), 1.0)                ;
     
     // Debug, verify roughness lookup.
     //    output.rgb = abs(brdf.bbb - 	float3(roughness,roughness,roughness));
     return output;
 }
 
-float4 Ibl_Specular(float IN_metal, float IN_roughness, float3 IN_normal, float3 IN_eyeVec, float4 IN_albedo) 
-{
-    // Normal dependent terms.
-    float  NoV = -dot (IN_eyeVec, IN_normal);
-    float3 reflection = normalize(reflect(IN_eyeVec, IN_normal));
-
-    // Alter roughnessMipCount depending on the output resolution of the baker.
-    const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f);
-    const float roughnessMipCount = 9.0f; 
-    float  roughness = 1.0 - IN_roughness;
-    float3 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz;
-    float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount)));
-
-    // Hack version to decrease fresnel the more metal a meterial is.
-    float4 specular = lerp(dielectricColor, IN_albedo, IN_metal) * brdf.x + (brdf.y*(clamp(1.0-IN_metal, 0.04f, 1.0f)));
-    // Non hack version.
-    // specular                   = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y;
-    return specularEnvironment * specular;
-}
 
 float4 IblSurfaceFS_Constant(VertexOutput input) 
 {
@@ -309,24 +294,24 @@ float4 IblSurfaceFS_Constant(VertexOutput input)
     float4 albedo = constAlbedoColor;
 
     // Specular material terms.
-    float  metal     = constMetalness;
-    float  bakedAO   = 1.0;
+    float  metal     = constMetalness ;
+    float  bakedAO   = 1.0            ;
 
     // Compute normal.
-    float3 normal     = normalize(input.normal.xyz);
-    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * float3(2,2,2)-float3(1,1,1);    
-    normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal);
+    float3 normal     = normalize(input.normal.xyz)                                                                  ;
+    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * float3(2,2,2)-float3(1,1,1)                      ;
+    normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal) ;
 
     // Diffuse.
-    float4 diffuseEnvironment  = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159;    
-    float4 diffuse     = albedo * (1.0 - metal) * diffuseEnvironment; 
+    float4 diffuseEnvironment = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159 ;
+    float4 diffuse            = albedo * (1.0 - metal) * diffuseEnvironment                                          ;
 
     // Specular.
     float4 specular = Ibl_Specular(constMetalness, constRoughness, normal.xyz, input.eye.xyz, albedo);
 
     // Final.
-    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
-    output = float4(toGamma(output.rgb), 1.0);
+    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1.0) ;
+    output = float4(toGamma(output.rgb), 1.0)                  ;
 
     return output;
 }
@@ -349,15 +334,15 @@ float4 IblSurfaceFS_Alpha(VertexOutput input) : COLOR
 
 float4 IblSurfaceFS_Alpha_Constant(VertexOutput input) : COLOR
 {
-  float  diffAlpha = tex2D(AlbedoSampler, input.texcoord0).a ;
-  return float4(IblSurfaceFS_Constant(input).rgb, diffAlpha) ; //Modify opaque alpha : Constant
+  float  diffAlpha = tex2D(AlbedoSampler, input.texcoord0).a          ;
+  return float4(IblSurfaceFS_Constant(input).rgb, constAlbedoColor.a) ; //Modify opaque alpha : Constant
 }
 
 ////////////////////////////////////////
 ////// Techniques //////////////////////
 ////////////////////////////////////////
 
-technique IBLSurface_Unity 
+technique IBLSurface_Unity_Opaque
 {
   pass P0
   {
@@ -370,7 +355,7 @@ technique IBLSurface_Unity
   }
 }
 
-technique IBLSurface_Unity_1_Bit_Alpha //onebit alpha testing
+technique IBLSurface_Unity_CutOut // 1-bit alpha testing
 {
   pass P0
   {
@@ -386,7 +371,7 @@ technique IBLSurface_Unity_1_Bit_Alpha //onebit alpha testing
   }
 }
 
-technique IBLSurface_Unity_8_Bit_Alpha //onebit alpha testing
+technique IBLSurface_Unity_Alpha // 8-bit alpha testing
 {
   pass P0
   {
@@ -402,7 +387,7 @@ technique IBLSurface_Unity_8_Bit_Alpha //onebit alpha testing
   }
 }
 
-technique IBLSurface_Unity_1_Bit_Alpha_Const //onebit alpha testing
+technique IBLSurface_Unity_Const_Alpha //const with alpha (8-bit)
 {
   pass P0
   {
@@ -410,10 +395,12 @@ technique IBLSurface_Unity_1_Bit_Alpha_Const //onebit alpha testing
     DepthMask       = true  ;
     CullFaceEnable  = false ;
 
-    AlphaTestEnable = true                ; //alpha test flag
-    AlphaFunc       = float2(Greater, .5) ; //alpha test flag
+    //AlphaTestEnable = true                ; //alpha test flag
+    //AlphaFunc       = float2(Greater, .5) ; //alpha test flag
+    BlendEnable = true                             ; //alpha blending flag
+    blendfunc = float2(srcalpha, oneminussrcalpha) ; //alpha blending flag
 
-    VertexShader    = compile vp40 IblSurfaceVS()       ;
+    VertexShader    = compile vp40 IblSurfaceVS()                ;
     PixelShader     = compile fp40 IblSurfaceFS_Alpha_Constant() ;
   }
 }

@@ -153,12 +153,33 @@ samplerCUBE SpecularLightingSampler = sampler_state
     WrapR     = ClampToEdge        ;
 }                                  ;
 
+//Constants
+float4 constAlbedoColor
+<
+  string UIName   = "Albedo Color";
+  string Type     = "Color";
+> = {0.9, 0.9, 0.9, 1.0};
+
+float constRoughness <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+> = 1.0;
+
+float constMetalness <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+> = 1.0;
+
 struct VertexInput
 {
     float4 position  : POSITION  ;
     float3 normal    : NORMAL    ;
-    float4 texcoord0 : TEXCOORD0 ;
-    float4 texcoord1 : TEXCOORD1 ;
+    float2 texcoord0 : TEXCOORD0 ;
+    float2 texcoord1 : TEXCOORD1 ;
     float3 tangent   : TEXCOORD6 ; //TANGENT  ;
     float3 binormal  : TEXCOORD7 ; //BINORMAL ;
 };
@@ -259,6 +280,58 @@ float4 IblSurfaceColor(VertexOutput input) //NOTE : Can't have : COLOR semantic;
     return output;
 }
 
+float4 Ibl_Specular(float IN_metal, float IN_roughness, float3 IN_normal, float3 IN_eyeVec, float4 IN_albedo) 
+{
+    // Normal dependent terms.
+    float  NoV = -dot (IN_eyeVec, IN_normal);
+    float3 reflection = normalize(reflect(IN_eyeVec, IN_normal));
+
+    // Alter roughnessMipCount depending on the output resolution of the baker.
+    const float4 dielectricColor  = float4(0.04f, 0.04f, 0.04f, 1.0f);
+    const float roughnessMipCount = 9.0f; 
+    float  roughness = 1.0 - IN_roughness;
+    float3 brdf                   = texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz;
+    float4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, reflection, roughness * roughnessMipCount)));
+
+    // Hack version to decrease fresnel the more metal a meterial is.
+    float4 specular = lerp(dielectricColor, IN_albedo, IN_metal) * brdf.x + (brdf.y*(clamp(1.0-IN_metal, 0.04f, 1.0f)));
+    // Non hack version.
+    // specular                   = lerp(dielectricColor, albedo, metal) * brdf.x + brdf.y;
+    return specularEnvironment * specular;
+}
+
+float4 IblSurfaceFS_Constant(VertexOutput input) 
+{
+    float4 output;
+
+    // Albedo term.
+    //float4 albedo = toLinear(tex2D(AlbedoSampler, input.texcoord0));
+    float4 albedo = constAlbedoColor;
+
+    // Specular material terms.
+    float  metal     = constMetalness;
+    float  bakedAO   = 1.0;
+
+    // Compute normal.
+    float3 normal     = normalize(input.normal.xyz);
+    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * float3(2,2,2)-float3(1,1,1);    
+    normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal);
+
+    // Diffuse.
+    float4 diffuseEnvironment  = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159;    
+    float4 diffuse     = albedo * (1.0 - metal) * diffuseEnvironment; 
+
+    // Specular.
+    float4 specular = Ibl_Specular(constMetalness, constRoughness, normal.xyz, input.eye.xyz, albedo);
+
+    // Final.
+    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1);
+    output = float4(toGamma(output.rgb), 1.0);
+
+    return output;
+}
+
+
 ////////////////////////////////////////
 ////// Pixel Shaders ///////////////////
 ////////////////////////////////////////
@@ -272,6 +345,12 @@ float4 IblSurfaceFS_Alpha(VertexOutput input) : COLOR
 {
   float  diffAlpha = tex2D(AlbedoSampler, input.texcoord0).a ;
   return float4(IblSurfaceColor(input).rgb, diffAlpha)       ; //Modify opaque alpha : Setup to use Technique to handle alpha vs. alphaBool
+}
+
+float4 IblSurfaceFS_Alpha_Constant(VertexOutput input) : COLOR
+{
+  float  diffAlpha = tex2D(AlbedoSampler, input.texcoord0).a ;
+  return float4(IblSurfaceFS_Constant(input).rgb, diffAlpha) ; //Modify opaque alpha : Constant
 }
 
 ////////////////////////////////////////
@@ -322,5 +401,22 @@ technique IBLSurface_Unity_8_Bit_Alpha //onebit alpha testing
     PixelShader     = compile fp40 IblSurfaceFS_Alpha() ;
   }
 }
+
+technique IBLSurface_Unity_1_Bit_Alpha_Const //onebit alpha testing
+{
+  pass P0
+  {
+    DepthTestEnable = true  ;
+    DepthMask       = true  ;
+    CullFaceEnable  = false ;
+
+    AlphaTestEnable = true                ; //alpha test flag
+    AlphaFunc       = float2(Greater, .5) ; //alpha test flag
+
+    VertexShader    = compile vp40 IblSurfaceVS()       ;
+    PixelShader     = compile fp40 IblSurfaceFS_Alpha_Constant() ;
+  }
+}
+
 
 

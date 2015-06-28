@@ -43,6 +43,7 @@
 //  1.2 - 6/27/2015 : Mike Ton - Adding cutout and alpha techniques
 
 string description = "IBL Shader Unity";
+//string descrip8bit = "8-Bit Alpha has sorting issues : Use 1_Bit when possible"; //Alternate way of adding notes to GUI
 
 bool spacer_AlbedoAlpha <string UIName   = ">>Alpha is read from Albedo/Diffuse Sampler alpha channel >>" ; > = false ;
 bool spacer_8_Bit_Alpha <string UIName   = ">>8-Bit Alpha has sorting issues : Use 1_Bit when possible>>" ; > = false ;
@@ -117,6 +118,9 @@ sampler2D AmbOcclusionSampler = sampler_state
     MagFilter = Linear             ;
     MipFilter = Linear             ;
 }                                  ;
+
+bool spacer_ImageLookUp <string UIName   = ">>Must path to image lookup per material == Unity env/sky >>" ; > = false ;
+bool spacer_ImageContnr <string UIName   = ">>Try to path to container ref as opposed to loaded files >>" ; > = false ;
 
 texture Brdf < string ResourceType = "2D"; >;
 sampler2D BrdfSampler = sampler_state 

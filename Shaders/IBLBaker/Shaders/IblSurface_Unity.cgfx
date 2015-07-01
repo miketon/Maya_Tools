@@ -226,7 +226,13 @@ float4 RGBMDecode ( float4 rgbm )
 
 ////////////////////////////////////////
 
-float4 Ibl_Specular(float IN_metal, float IN_roughness, float3 IN_normal, float3 IN_eyeVec, float4 IN_albedo) 
+float4 Ibl_Diffuse(float3 IN_normal, float IN_metal, float4 IN_albedo) 
+{
+    float4 diffuseEnvironment = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, IN_normal, 0.0f))) / 3.14159 ;
+    return IN_albedo * (1.0 - IN_metal) * diffuseEnvironment                                                            ;
+}
+
+float4 Ibl_Specular(float3 IN_normal, float3 IN_eyeVec, float IN_metal, float IN_roughness, float4 IN_albedo) 
 {
     // Normal dependent terms.
     float  NoV        = -dot (IN_eyeVec, IN_normal)              ;
@@ -242,26 +248,22 @@ float4 Ibl_Specular(float IN_metal, float IN_roughness, float3 IN_normal, float3
     // Hack version to decrease fresnel the more metal a meterial is.
     //float4 specular = lerp(dielectricColor, IN_albedo, IN_metal) * brdf.x + (brdf.y*(clamp(1.0-IN_metal, 0.04f, 1.0f)));
     // Non hack version.
-    float4 specular                   = lerp(dielectricColor, IN_albedo, IN_metal) * brdf.x + brdf.y ;
-    return specularEnvironment * specular                                                            ;
+    float4 specular = lerp(dielectricColor, IN_albedo, IN_metal) * brdf.x + brdf.y ;
+    return specularEnvironment * specular                                          ;
 }
 
 float4 IblSurfaceColor(VertexOutput input) //NOTE : Can't have : COLOR semantic; only one entry function
 {
-    float4 output;
-
     // Albedo term.
     float4 albedo = toLinear(tex2D(AlbedoSampler, input.texcoord0));
 
-    // Specular material terms.
-    float4 maskMap   = tex2D(MetallicSampler, input.texcoord0);
+    // Metal/Roughness material terms.
+    float4 maskMap   = tex2D(MetallicSampler, input.texcoord0) ;
+    float  metal     = maskMap.r                               ;
+    float  roughness = 1.0 - maskMap.a                         ; //roughness == Unity smoothness ; stored in alpha channel on Standard (metal)
 
     // Ambient Occulision : Unity separates
-    float4 AmbOcclusion = tex2D(AmbOcclusionSampler, input.texcoord0);
-
-    float  metal     = maskMap.r       ;
-    float  roughness = 1.0 - maskMap.a ; //roughness == Unity smoothness ; stored in alpha channel on Standard (metal)
-    float  bakedAO   = AmbOcclusion.r  ; //maskMap.b                     ;
+    float bakedAO = tex2D(AmbOcclusionSampler, input.texcoord0).r;
 
     // Compute normal.
     float3 normal     = input.normal.xyz                                                                             ;
@@ -269,51 +271,42 @@ float4 IblSurfaceColor(VertexOutput input) //NOTE : Can't have : COLOR semantic;
     normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal) ;
 
     // Diffuse.
-    float4 diffuseEnvironment = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159 ;
-    float4 diffuse            = albedo * (1.0 - metal) * diffuseEnvironment                                          ;
+    float4 diffuse = Ibl_Diffuse(normal, metal, albedo);
 
     // Specular.
-    float4 specular = Ibl_Specular(metal, roughness, normal.xyz, input.eye.xyz, albedo);
+    float4 specular = Ibl_Specular(normal.xyz, input.eye.xyz, metal, roughness, albedo);
 
     // Final
-    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1) ;
-    output = float4(toGamma(output.rgb), 1.0)                ;
+    return float4(toGamma((diffuse.rgb+specular.rgb) * bakedAO), 1.0) ;
     
     // Debug, verify roughness lookup.
-    //    output.rgb = abs(brdf.bbb - 	float3(roughness,roughness,roughness));
-    return output;
+    // return abs(brdf.bbb - 	float3(roughness,roughness,roughness));
 }
 
 
 float4 IblSurfaceFS_Constant(VertexOutput input) 
 {
-    float4 output;
-
     // Albedo term.
-    //float4 albedo = toLinear(tex2D(AlbedoSampler, input.texcoord0));
     float4 albedo = constAlbedoColor;
 
-    // Specular material terms.
+    // Metal/Roughness material terms.
     float  metal     = constMetalness ;
+    float  roughness = constRoughness ;
     float  bakedAO   = 1.0            ;
 
     // Compute normal.
     float3 normal     = normalize(input.normal.xyz)                                                                  ;
-    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * float3(2,2,2)-float3(1,1,1)                      ;
+    float3 normalMap  = tex2D(NormalSampler, input.texcoord0).xyz * 2.0f - 1.0f                                      ; // float3(2,2,2)-float3(1,1,1) ;
     normal            = normalize(normalMap.x*input.tangent + normalMap.y*input.binormal + normalMap.z*input.normal) ;
 
     // Diffuse.
-    float4 diffuseEnvironment = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / 3.14159 ;
-    float4 diffuse            = albedo * (1.0 - metal) * diffuseEnvironment                                          ;
+    float4 diffuse = Ibl_Diffuse(normal, metal, albedo);
 
     // Specular.
-    float4 specular = Ibl_Specular(constMetalness, constRoughness, normal.xyz, input.eye.xyz, albedo);
+    float4 specular = Ibl_Specular(normal.xyz, input.eye.xyz, metal, roughness, albedo);
 
     // Final.
-    output = float4((diffuse.rgb+specular.rgb) * bakedAO, 1.0) ;
-    output = float4(toGamma(output.rgb), 1.0)                  ;
-
-    return output;
+    return float4(toGamma((diffuse.rgb+specular.rgb) * bakedAO), 1.0) ;
 }
 
 
@@ -321,7 +314,7 @@ float4 IblSurfaceFS_Constant(VertexOutput input)
 ////// Pixel Shaders ///////////////////
 ////////////////////////////////////////
 
-float4 IblSurfaceFS_Opque(VertexOutput input) : COLOR
+float4 IblSurfaceFS_Opaque(VertexOutput input) : COLOR
 {
   return float4(IblSurfaceColor(input))                      ; //Return opaque color : Setup to use Technique to handle alpha vs. alphaBool
 }
@@ -334,7 +327,6 @@ float4 IblSurfaceFS_Alpha(VertexOutput input) : COLOR
 
 float4 IblSurfaceFS_Alpha_Constant(VertexOutput input) : COLOR
 {
-  float  diffAlpha = tex2D(AlbedoSampler, input.texcoord0).a          ;
   return float4(IblSurfaceFS_Constant(input).rgb, constAlbedoColor.a) ; //Modify opaque alpha : Constant
 }
 
@@ -350,8 +342,8 @@ technique IBLSurface_Unity_Opaque
     DepthMask       = true  ;
     CullFaceEnable  = false ;
 
-    VertexShader    = compile vp40 IblSurfaceVS()       ;
-    PixelShader     = compile fp40 IblSurfaceFS_Opque() ;
+    VertexShader    = compile vp40 IblSurfaceVS()        ;
+    PixelShader     = compile fp40 IblSurfaceFS_Opaque() ;
   }
 }
 
